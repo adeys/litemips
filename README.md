@@ -1,10 +1,10 @@
-Lite Virtual Machine (LVM)
+Lite Mips Simulator (LMS)
 --------------------------
 
-Lite VM is a MIPS subset implementation.
+Lite Mips Simulator is a MIPS subset implementation.
 
 ## Registers
-**LVM** has :
+**LMS** has :
 - 32 32-bit sized general-purpose registers
 - 3 special registers
 
@@ -35,7 +35,7 @@ They are named following two differents conventions:
 - **PC** register : Program Counter register
 
 ## Instructions
-Instructions within **LVM** are 32bit long with the first 6bits reserved to **OpCode**.
+Instructions within **LMS** are 32bit long with the first 6bits reserved to **OpCode**.
 Following formats are possible
 
 - R-type formats
@@ -94,13 +94,6 @@ Following instructions are supported
 |  xor  |  100110  | f $d, $s, $t | $d = $s ^ $t |
 |  xori |  001110  | f $d, $s, i  | $d = $s ^ ZE(i) |
 
-- Constant-Manipulating Instructions
-
-| Instruction | Opcode/Function | Syntax | Operation |
-| :---------: | :-------------: | :----: | :-------: |
-|  lhi  |  011001  | o $t, immed32 | HH ($t) = i |
-|  llo  |  011000  | o $t, immed32 | LH ($t) = i |
-
 - Comparison Instructions
 
 | Instruction | Opcode/Function | Syntax | Operation |
@@ -114,16 +107,16 @@ Following instructions are supported
 
 | Instruction | Opcode/Function | Syntax | Operation |
 | :---------: | :-------------: | :----: | :-------: |
-|  beq  |  000100  | o $s, $t, label | if ($s == $t) pc += i << 2 |
-|  bgtz |  000111  |   o $s, label   | if ($s > 0) pc += i << 2 |
-|  blez |  000110  |   o $s, label   | if ($s <= 0) pc += i << 2 |
-|  bne  |  000101  | o $s, $t, label | if ($s != $t) pc += i << 2 |
+|  beq  |  000100  | o $s, $t, offset | if ($s == $t) pc += i << 2 |
+|  bgtz |  000111  |   o $s, offset   | if ($s > 0) pc += i << 2 |
+|  blez |  000110  |   o $s, offset   | if ($s <= 0) pc += i << 2 |
+|  bne  |  000101  | o $s, $t, offset | if ($s != $t) pc += i << 2 |
 
 - Jump Instructions
 
 | Instruction | Opcode/Function | Syntax | Operation |
 | :---------: | :-------------: | :----: | :-------: |
-|   j   |  000010  |  o label  | pc += i << 2
+|   j   |  000010  |  o label  | pc += i << 2 |
 |  jal  |  000011  |  o label  |$31 = pc; pc += i << 2
 |  jalr |  001001  |  o labelR | $31 = pc; pc = $s |
 |   jr  |  001000  |  o labelR | pc = $s |
@@ -161,6 +154,6 @@ Following instructions are supported
 | syscall |  001100  |  o   | Cause a System Call exception. |
 
 ## Internal representation
-The **LVM** will consist of two main components:
+The **LMS** will consist of two main components:
 - The assembler : That will translate program from assembly to runnable code (machine/byte code)
 - The virtual machine (that we can call MIPS CPU) that will run the generated code
