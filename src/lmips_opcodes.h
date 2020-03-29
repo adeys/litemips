@@ -2,7 +2,7 @@
 #define LMIPS_OPCODES
 
 enum OpCodes {
-    OP_ALU,
+    OP_SPECIAL,
     OP_BEQ = 0x04,
     OP_BNE,
     OP_BLEZ,
@@ -23,34 +23,34 @@ enum OpCodes {
     OP_SH
 };
 
-enum AluCodes {
-    OP_SLL,
-    OP_SRL = 0x02,
-    OP_SRA,
-    OP_SLLV,
-    OP_SRLV = 0x06,
-    OP_SRAV,
-    OP_JR,
-    OP_JALR,
-    OP_SYSCALL = 0x0D,
-    OP_MFHI = 0x10,
-    OP_MTHI,
-    OP_MFLO,
-    OP_MTLO,
-    OP_MULT = 0x18,
-    OP_MULTU,
-    OP_DIV,
-    OP_DIVU,
-    OP_ADD = 0x20,
-    OP_ADDU,
-    OP_SUB,
-    OP_SUBU,
-    OP_AND,
-    OP_OR,
-    OP_XOR,
-    OP_NOR,
-    OP_SLT = 0x2A,
-    OP_SLTU
+enum SpecialCodes {
+    SPE_SLL,
+    SPE_SRL = 0x02,
+    SPE_SRA,
+    SPE_SLLV,
+    SPE_SRLV = 0x06,
+    SPE_SRAV,
+    SPE_JR,
+    SPE_JALR,
+    SPE_SYSCALL = 0x0D,
+    SPE_MFHI = 0x10,
+    SPE_MTHI,
+    SPE_MFLO,
+    SPE_MTLO,
+    SPE_MULT = 0x18,
+    SPE_MULTU,
+    SPE_DIV,
+    SPE_DIVU,
+    SPE_ADD = 0x20,
+    SPE_ADDU,
+    SPE_SUB,
+    SPE_SUBU,
+    SPE_AND,
+    SPE_OR,
+    SPE_XOR,
+    SPE_NOR,
+    SPE_SLT = 0x2A,
+    SPE_SLTU
 };
 
 enum SysCallCodes {
@@ -59,6 +59,6 @@ enum SysCallCodes {
     SYS_READ_INT,
     SYS_READ_STRING = 0x08,
     SYS_EXIT = 0x10
-}
+};
 
 #endif // LMIPS_OPCODES
