@@ -81,6 +81,61 @@ ExecutionResult execInstruction(LMips* mips) {
         case OP_SPECIAL: {
             uint8_t func = GET_FUNC(instr);
             switch (func) {
+                case SPE_SLL: {
+                    mips->regs[GET_RD(instr)] = mips->regs[GET_RT(instr)] << GET_SA(instr);
+                    break;
+                }
+                case SPE_SRL:
+                case SPE_SRA: {
+                    mips->regs[GET_RD(instr)] = mips->regs[GET_RT(instr)] >> GET_SA(instr);
+                    break;
+                }
+                case SPE_SLLV: {
+                    uint8_t amount = mips->regs[GET_RS(instr)] & 0x1F;
+                    mips->regs[GET_RD(instr)] = mips->regs[GET_RT(instr)] << amount;
+                    break;
+                }
+                case SPE_SRLV:
+                case SPE_SRAV: {
+                    uint8_t amount = mips->regs[GET_RS(instr)] & 0x1F;
+                    mips->regs[GET_RD(instr)] = mips->regs[GET_RT(instr)] >> amount;
+                    break;
+                }
+                case SPE_SYSCALL: {
+                    mips->stop = true;
+                    break;
+                }
+                case SPE_MFHI: {
+                    mips->regs[GET_RD(instr)] = mips->hi;
+                    break;
+                }
+                case SPE_MTHI: {
+                    mips->hi = mips->regs[GET_RS(instr)];
+                    break;
+                }
+                case SPE_MFLO: {
+                    mips->regs[GET_RD(instr)] = mips->lo;
+                    break;
+                }
+                case SPE_MTLO: {
+                    mips->hi = mips->regs[GET_RS(instr)];
+                    break;
+                }case SPE_MULT:
+                case SPE_MULTU: {
+                    int64_t result = mips->regs[GET_RS(instr)] * mips->regs[GET_RT(instr)];
+                    mips->hi = result >> 0x20;
+                    mips->lo = (int32_t)result;
+                    break;
+                }
+                case SPE_DIV:
+                case SPE_DIVU: {
+                    int32_t rs = mips->regs[GET_RS(instr)];
+                    int32_t rt = mips->regs[GET_RT(instr)];
+
+                    mips->hi = rs % rt;
+                    mips->lo = rs / rt;
+                    break;
+                }
                 case SPE_ADD: {
                     BIN_OP(+);
                     break;
@@ -97,24 +152,25 @@ ExecutionResult execInstruction(LMips* mips) {
                     BINU_OP(-);
                     break;
                 }
-                case SPE_MULT:
-                case SPE_MULTU: {
-                    int64_t result = mips->regs[GET_RS(instr)] * mips->regs[GET_RT(instr)];
-                    mips->hi = result >> 0x20;
-                    mips->lo = (int32_t)result;
+                case SPE_AND: {
+                    BINU_OP(&);
                     break;
                 }
-                case SPE_DIV:
-                case SPE_DIVU: {
-                    int32_t rs = mips->regs[GET_RS(instr)];
-                    int32_t rt = mips->regs[GET_RT(instr)];
-
-                    mips->hi = rs % rt;
-                    mips->lo = rs / rt;
+                case SPE_OR: {
+                    BINU_OP(|);
                     break;
                 }
-                case SPE_SYSCALL: {
-                    mips->stop = true;
+                case SPE_XOR: {
+                    BINU_OP(^);
+                    break;
+                }
+                case SPE_NOR: {
+                    mips->regs[GET_RD(instr)] = ~(mips->regs[GET_RS(instr)] | mips->regs[GET_RT(instr)]);
+                    break;
+                }
+                case SPE_SLT:
+                case SPE_SLTU: {
+                    mips->regs[GET_RD(instr)] = (mips->regs[GET_RS(instr)] < mips->regs[GET_RT(instr)]);
                     break;
                 }
                 default:
