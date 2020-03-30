@@ -116,7 +116,16 @@ ExecutionResult execInstruction(LMips* mips) {
                     break;
                 }
                 case SPE_SYSCALL: {
-                    mips->stop = true;
+                    switch (mips->regs[$v0]) {
+                        case SYS_EXIT: {
+                            mips->stop = true;
+                            break;
+                        }
+                        default: {
+                            fprintf(stderr, "Unknown syscall instruction %d\n", mips->regs[$v0]);
+                            return EXEC_FAILURE;
+                        }
+                    }
                     break;
                 }
                 case SPE_MFHI: {

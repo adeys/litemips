@@ -60,7 +60,7 @@ enum SysCallCodes {
     SYS_PRINT_STRING = 0x04,
     SYS_READ_INT,
     SYS_READ_STRING = 0x08,
-    SYS_EXIT = 0x10
+    SYS_EXIT = 0x0A
 };
 
 #endif // LMIPS_OPCODES

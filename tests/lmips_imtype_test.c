@@ -8,6 +8,7 @@ void testAddiInstructionWithOverflow(CuTest* test) {
 
     uint8_t program[] = {
             0x21, 0x09, 0x00, 0x64, // addi $t1, $t0, 100
+            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
@@ -26,6 +27,7 @@ void testAddiuInstruction(CuTest* test) {
 
     uint8_t program[] = {
             0x24, 0x08, 0x00, 0x64, // addiu $t0, $0, 100
+            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
@@ -43,6 +45,7 @@ void testSltiInstruction(CuTest* test) {
 
     uint8_t program[] = {
             0x28, 0x08, 0xFF, 0x9C, // slti $t0, $0, -100
+            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
@@ -61,6 +64,7 @@ void testSltiuInstruction(CuTest* test) {
     uint8_t program[] = {
             // Here the 16-bit number will be considered unsigned
             0x2C, 0x08, 0xFF, 0x9C, // slti $t0, $0, 65436
+            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
@@ -79,6 +83,7 @@ void testBeqInstruction(CuTest* test) {
     uint8_t program[] = {
             0x10, 0x80, 0x00, 0x01, // beq $0, $a0, 4
             0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
+            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
@@ -89,7 +94,7 @@ void testBeqInstruction(CuTest* test) {
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
-    CuAssertIntEquals(test, 12, mips.ip);
+    CuAssertIntEquals(test, 16, mips.ip);
     CuAssertIntEquals(test, 0, mips.lo);
 
     freeSimulator(&mips);
@@ -99,9 +104,11 @@ void testBlezInstruction(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x18, 0x80, 0x00, 0x01, // blez $a0, 4
+            0x18, 0x80, 0x00, 0x02, // blez $a0, 8
+            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
             OP_SPECIAL, 0, 0, SPE_SYSCALL,
             0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
+            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
@@ -112,7 +119,7 @@ void testBlezInstruction(CuTest* test) {
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
-    CuAssertIntEquals(test, 16, mips.ip);
+    CuAssertIntEquals(test, 24, mips.ip);
     CuAssertIntEquals(test, 150, mips.lo);
     CuAssertIntEquals(test, 0, mips.hi);
 
