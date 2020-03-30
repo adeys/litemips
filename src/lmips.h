@@ -28,7 +28,8 @@ void freeSimulator(LMips* mips);
 ExecutionResult runSimulator(LMips* mips);
 ExecutionResult execInstruction(LMips* mips);
 
-uint32_t sign_extend(uint32_t x, int bit_count);
+uint32_t zero_extend(uint16_t x, int bit_count);
+int32_t sign_extend(int16_t x, int bit_count);
 void handleException(ExecutionResult);
 
 #endif // LMIPS_MIPS

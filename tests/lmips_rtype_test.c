@@ -175,7 +175,7 @@ void testSltProgram(CuTest* test) {
     freeSimulator(&mips);
 }
 
-CuSuite* getLMipsSimulatorSuite() {
+CuSuite* getLMipsRTypeInstructionsSuite() {
     CuSuite* suite = CuSuiteNew();
 
     SUITE_ADD_TEST(suite, testSimulatorInit);
@@ -187,6 +187,7 @@ CuSuite* getLMipsSimulatorSuite() {
     SUITE_ADD_TEST(suite, testMfloProgram);
     SUITE_ADD_TEST(suite, testSraProgram);
     SUITE_ADD_TEST(suite, testSllvProgram);
+    SUITE_ADD_TEST(suite, testSltProgram);
 
     return suite;
 }

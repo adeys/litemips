@@ -3,10 +3,6 @@
 #include "lmips.h"
 #include "lmips_opcodes.h"
 
-bool checkOverflow(int x) {
-    return x > INT32_MAX || x < INT32_MIN;
-}
-
 void resetSimulator(LMips* mips) {
     mips->ip = 0;
     mips->hi = 0;
@@ -62,15 +58,22 @@ ExecutionResult execInstruction(LMips* mips) {
 #define GET_RD(instr) ((instr >> 0x0B) & 0x1F)
 #define GET_SA(instr) ((instr >> 0x06) & 0x1F)
 #define GET_FUNC(instr) (instr & 0x3F)
-#define BIN_OP(op) \
+#define GET_IMMED(instr) (instr & 0xFFFF)
+#define CHECK_OVERFLOW(x, y, op) \
     do { \
-        int res = mips->regs[GET_RS(instr)] op mips->regs[GET_RT(instr)]; \
-        if (checkOverflow(res)) { \
+        int64_t res = (int64_t)x op y;\
+        if (res > INT32_MAX || res < INT32_MIN) { \
             return EXEC_EXCP_INT_OVERFLOW; \
         } \
+    } while(false)
+#define BIN_OP(op) \
+    do { \
+        int32_t rs = mips->regs[GET_RS(instr)]; \
+        int32_t rt = mips->regs[GET_RT(instr)]; \
+        CHECK_OVERFLOW(rs, rt, op); \
 \
         uint8_t rd = GET_RD(instr); \
-        mips->regs[rd] = res;\
+        mips->regs[rd] = rs op rt;\
     } while(false)
 #define BINU_OP(op) (mips->regs[GET_RD(instr)] = mips->regs[GET_RS(instr)] op mips->regs[GET_RT(instr)])
 
@@ -120,7 +123,8 @@ ExecutionResult execInstruction(LMips* mips) {
                 case SPE_MTLO: {
                     mips->hi = mips->regs[GET_RS(instr)];
                     break;
-                }case SPE_MULT:
+                }
+                case SPE_MULT:
                 case SPE_MULTU: {
                     int64_t result = mips->regs[GET_RS(instr)] * mips->regs[GET_RT(instr)];
                     mips->hi = result >> 0x20;
@@ -132,8 +136,11 @@ ExecutionResult execInstruction(LMips* mips) {
                     int32_t rs = mips->regs[GET_RS(instr)];
                     int32_t rt = mips->regs[GET_RT(instr)];
 
-                    mips->hi = rs % rt;
-                    mips->lo = rs / rt;
+                    if (rt != 0) {
+                        mips->hi = rs % rt;
+                        mips->lo = rs / rt;
+                    }
+
                     break;
                 }
                 case SPE_ADD: {
@@ -178,16 +185,65 @@ ExecutionResult execInstruction(LMips* mips) {
                     return EXEC_FAILURE;
             }
 
-            return EXEC_SUCCESS;
+            break;
+        }
+        case OP_ADDI: {
+            int32_t immed = sign_extend(GET_IMMED(instr), 16);
+            int32_t rs = mips->regs[GET_RS(instr)];
+            CHECK_OVERFLOW(rs, immed, +);
+
+            mips->regs[GET_RT(instr)] = rs + immed;;
+            break;
+        }
+        case OP_ADDIU: {
+            int32_t immed = zero_extend(GET_IMMED(instr), 16);
+
+            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] + immed;
+            break;
+        }
+        case OP_SLTI: {
+            int32_t immed = sign_extend(GET_IMMED(instr), 16);
+
+            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] < immed;
+            break;
+        }
+        case OP_SLTIU: {
+            uint32_t immed = zero_extend(GET_IMMED(instr), 16);
+
+            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] < immed;
+            break;
+        }
+        case OP_ANDI: {
+            uint32_t immed = zero_extend(GET_IMMED(instr), 16);
+
+            mips->regs[GET_RT(instr)] = GET_RS(instr) & immed;
+            break;
+        }
+        case OP_ORI: {
+            uint32_t immed = zero_extend(GET_IMMED(instr), 16);
+
+            mips->regs[GET_RT(instr)] = GET_RS(instr) | immed;
+            break;
+        }
+        case OP_XORI: {
+            uint32_t immed = zero_extend(GET_IMMED(instr), 16);
+
+            mips->regs[GET_RT(instr)] = GET_RS(instr) ^ immed;
+            break;
         }
         default:
             fprintf(stderr, "Unknown instruction %d\n", op);
             return EXEC_FAILURE;
     }
+
+    return EXEC_SUCCESS;
 }
 
+uint32_t zero_extend(uint16_t x, int bit_count) {
+    return x | (0x00 << bit_count);
+}
 
-uint32_t sign_extend(uint32_t x, int bit_count) {
+int32_t sign_extend(int16_t x, int bit_count) {
     if ((x >> (bit_count - 1)) & 1) {
         x |= (0xFFFF << bit_count);
     }
@@ -197,6 +253,6 @@ uint32_t sign_extend(uint32_t x, int bit_count) {
 
 void handleException(ExecutionResult exc) {
     if (exc == EXEC_EXCP_INT_OVERFLOW) {
-        fprintf(stderr, "Integer overflow exception.");
+        fprintf(stderr, "Integer overflow exception.\n");
     }
 }

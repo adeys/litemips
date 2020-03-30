@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include "CuTest.h"
 
-CuSuite* getLMipsSimulatorSuite();
+CuSuite* getLMipsRTypeInstructionsSuite();
+CuSuite* getLMipsITypeInstructionsSuite();
 
 int main(int argc, char const *argv[]) {
     printf("Welcome to Lite VM test suite.\n\n");
@@ -9,7 +10,8 @@ int main(int argc, char const *argv[]) {
     CuString *output = CuStringNew();
     CuSuite* suite = CuSuiteNew();
 
-    CuSuiteAddSuite(suite, getLMipsSimulatorSuite());
+    CuSuiteAddSuite(suite, getLMipsRTypeInstructionsSuite());
+    CuSuiteAddSuite(suite, getLMipsITypeInstructionsSuite());
 
     CuSuiteRun(suite);
     CuSuiteSummary(suite, output);
