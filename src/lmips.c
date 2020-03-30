@@ -209,6 +209,34 @@ ExecutionResult execInstruction(LMips* mips) {
             mips->ip = jt << 2;
             break;
         }
+        case OP_BEQ: {
+            if (mips->regs[GET_RS(instr)] == mips->regs[GET_RT(instr)]) {
+                uint32_t offset = GET_IMMED(instr) << 2;
+                mips->ip += offset;
+            }
+            break;
+        }
+        case OP_BNE: {
+            if (mips->regs[GET_RS(instr)] != mips->regs[GET_RT(instr)]) {
+                uint32_t offset = GET_IMMED(instr) << 2;
+                mips->ip += offset;
+            }
+            break;
+        }
+        case OP_BLEZ: {
+            if (mips->regs[GET_RS(instr)] <= 0) {
+                uint32_t offset = GET_IMMED(instr) << 2;
+                mips->ip += offset;
+            }
+            break;
+        }
+        case OP_BGTZ: {
+            if (mips->regs[GET_RS(instr)] >= 0) {
+                uint32_t offset = GET_IMMED(instr) << 2;
+                mips->ip += offset;
+            }
+            break;
+        }
         case OP_ADDI: {
             int32_t immed = sign_extend(GET_IMMED(instr), 16);
             int32_t rs = mips->regs[GET_RS(instr)];
