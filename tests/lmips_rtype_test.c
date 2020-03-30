@@ -8,7 +8,7 @@ void testSimulatorInit(CuTest* test) {
     initSimulator(&mips, NULL);
 
     for (int i = 0; i < REG_COUNT; ++i) {
-        CuAssertIntEquals(test,  i == $sp ? STACK_SIZE : 0, mips.regs[i]);
+        CuAssertIntEquals(test,  i == $sp ? (STACK_SIZE - 1) : (i == $gp ? (MEMORY_SIZE - 1) : 0) , mips.regs[i]);
     }
 
     freeSimulator(&mips);
@@ -27,7 +27,7 @@ void testRunNullProgram(CuTest* test) {
 void testRunInvalidProgram(CuTest* test) {
     LMips mips;
     uint8_t program[] = {
-            1, 0, 0, 0
+        1, 0, 0, 0
     };
 
     initSimulator(&mips, program);
@@ -41,8 +41,8 @@ void testRunInvalidProgram(CuTest* test) {
 void testRunValidProgram(CuTest* test) {
     LMips mips;
     uint8_t program[] = {
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
@@ -58,9 +58,9 @@ void testAddProgram(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x01, 0x09, 0x50, 0x20, // add $t2, $t0, $t1
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x01, 0x09, 0x50, 0x20, // add $t2, $t0, $t1
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
@@ -78,9 +78,9 @@ void testDivProgram(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x01, 0x09, 0x10, 0x1A, // div $t0, $t1
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x01, 0x09, 0x10, 0x1A, // div $t0, $t1
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
@@ -99,10 +99,10 @@ void testMfloProgram(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
-            0x00, 0x00, 0x50, SPE_MFLO, // mflo $t2
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
+        0x00, 0x00, 0x50, SPE_MFLO, // mflo $t2
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
@@ -122,10 +122,10 @@ void testSraProgram(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x01, 0x09, 0x50, 0x22, // sub $t2, $t0, $t1
-            0x00, 0x0A, 0x48, 0x44, // sra $t1, $t2, 1
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x01, 0x09, 0x50, 0x22, // sub $t2, $t0, $t1
+        0x00, 0x0A, 0x48, 0x44, // sra $t1, $t2, 1
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
@@ -144,10 +144,10 @@ void testSllvProgram(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x01, 0x09, 0x50, 0x20, // add $t2, $t0, $t1
-            0x01, 0x0A, 0x48, 0x04, // sslv $t1, $t2, $t0
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x01, 0x09, 0x50, 0x20, // add $t2, $t0, $t1
+        0x01, 0x0A, 0x48, 0x04, // sslv $t1, $t2, $t0
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
@@ -166,9 +166,9 @@ void testSltProgram(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x01, 0x09, 0x50, 0x2A, // slt $t2, $t0, $t1
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x01, 0x09, 0x50, 0x2A, // slt $t2, $t0, $t1
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
@@ -186,12 +186,12 @@ void testJrProgram(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x00, 0x80, 0x00, 0x08, // jr $a0
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL,
-            0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x00, 0x80, 0x00, 0x08, // jr $a0
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL,
+        0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
@@ -212,12 +212,12 @@ void testJalrProgram(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x00, 0x80, 0x00, 0x09, // jalr $a0
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL,
-            0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x00, 0x80, 0x00, 0x09, // jalr $a0
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL,
+        0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);

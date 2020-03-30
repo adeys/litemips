@@ -4,6 +4,7 @@
 CuSuite* getLMipsRTypeInstructionsSuite();
 CuSuite* getLMipsITypeInstructionsSuite();
 CuSuite* getLMipsJTypeInstructionsSuite();
+CuSuite* getLMipsMemoryInstructionsSuite();
 
 int main(int argc, char const *argv[]) {
     printf("Welcome to Lite VM test suite.\n\n");
@@ -14,6 +15,7 @@ int main(int argc, char const *argv[]) {
     CuSuiteAddSuite(suite, getLMipsRTypeInstructionsSuite());
     CuSuiteAddSuite(suite, getLMipsITypeInstructionsSuite());
     CuSuiteAddSuite(suite, getLMipsJTypeInstructionsSuite());
+    CuSuiteAddSuite(suite, getLMipsMemoryInstructionsSuite());
 
     CuSuiteRun(suite);
     CuSuiteSummary(suite, output);

@@ -16,7 +16,7 @@ void testAddiInstructionWithOverflow(CuTest* test) {
     mips.regs[$t0] = INT32_MAX;
 
     ExecutionResult result = runSimulator(&mips);
-    CuAssertIntEquals(test, EXEC_EXCP_INT_OVERFLOW, result);
+    CuAssertIntEquals(test, EXEC_ERR_INT_OVERFLOW, result);
     CuAssertIntEquals(test, 0, mips.regs[$t1]);
 
     freeSimulator(&mips);
