@@ -9,6 +9,7 @@ void resetSimulator(LMips* mips) {
     mips->lo = 0;
     mips->stop = false;
     mips->program = NULL;
+    mips->memory = NULL;
 
     // Init all registers to 0
     for (size_t i = 0; i < REG_COUNT; i++) {
@@ -18,12 +19,17 @@ void resetSimulator(LMips* mips) {
 
 void initSimulator(LMips* mips, uint8_t* program) {
     resetSimulator(mips);
-    mips->regs[$sp] = STACK_SIZE - 1;
-    mips->regs[$gp] = MEMORY_SIZE - 1;
+    mips->regs[$sp] = STACK_OFFSET;
+    mips->regs[$gp] = DATA_OFFSET;
     mips->program = program;
+
+    Memory memory;
+    initMemory(&memory);
+    mips->memory = &memory;
 }
 
 void freeSimulator(LMips* mips) {
+    freeMemory(mips->memory);
     resetSimulator(mips);
 }
 
@@ -236,14 +242,14 @@ ExecutionResult execInstruction(LMips* mips) {
             break;
         }
         case OP_BLEZ: {
-            if (mips->regs[GET_RS(instr)] <= 0) {
+            if ((int32_t)(mips->regs[GET_RS(instr)]) <= 0) {
                 uint32_t offset = GET_IMMED(instr) << 2;
                 mips->ip += offset;
             }
             break;
         }
         case OP_BGTZ: {
-            if (mips->regs[GET_RS(instr)] >= 0) {
+            if ((int32_t)(mips->regs[GET_RS(instr)]) >= 0) {
                 uint32_t offset = GET_IMMED(instr) << 2;
                 mips->ip += offset;
             }
@@ -260,19 +266,19 @@ ExecutionResult execInstruction(LMips* mips) {
         case OP_ADDIU: {
             int32_t immed = zero_extend(GET_IMMED(instr), 16);
 
-            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] + immed;
+            mips->regs[GET_RT(instr)] = (int32_t)(mips->regs[GET_RS(instr)]) + immed;
             break;
         }
         case OP_SLTI: {
             int32_t immed = sign_extend(GET_IMMED(instr), 16);
 
-            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] < immed;
+            mips->regs[GET_RT(instr)] = (int32_t)(mips->regs[GET_RS(instr)]) < immed;
             break;
         }
         case OP_SLTIU: {
             uint32_t immed = zero_extend(GET_IMMED(instr), 16);
 
-            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] < immed;
+            mips->regs[GET_RT(instr)] = (int32_t)(mips->regs[GET_RS(instr)]) < immed;
             break;
         }
         case OP_ANDI: {
@@ -295,61 +301,62 @@ ExecutionResult execInstruction(LMips* mips) {
         }
         case OP_LB: {
             int16_t offset = GET_IMMED(instr);
-            uint32_t address = mips->regs[GET_RS(instr)] + (offset / 4);
+            uint32_t address = mips->regs[GET_RS(instr)] + offset;
             CHECK_MEM_ADDR(offset, address);
-            int16_t byte = mem_read_byte(mips, address, true);
+            int8_t byte = mem_read_byte(mips->memory, address);
 
             mips->regs[GET_RT(instr)] = sign_extend(byte, 16);
             break;
         }
         case OP_LH: {
             int16_t offset = GET_IMMED(instr);
-            uint32_t address = mips->regs[GET_RS(instr)] + (offset / 4);
+            uint32_t address = mips->regs[GET_RS(instr)] + offset;
             CHECK_MEM_ADDR(offset, address);
+            int16_t half = mem_read_half(mips->memory, address);
 
-            mips->regs[GET_RT(instr)] = mem_read_half(mips, address, true);
+            mips->regs[GET_RT(instr)] = sign_extend(half, 16);
             break;
         }
         case OP_LW: {
             int16_t offset = GET_IMMED(instr);
-            uint32_t address = mips->regs[GET_RS(instr)] + (offset / 4);
+            uint32_t address = mips->regs[GET_RS(instr)] + offset;
             CHECK_MEM_ADDR(offset, address);
 
-            mips->regs[GET_RT(instr)] = mem_read(mips, address);
+            mips->regs[GET_RT(instr)] = (int32_t)mem_read(mips->memory, address);
             break;
         }
         case OP_LBU: {
             int16_t offset = GET_IMMED(instr);
-            uint32_t address = mips->regs[GET_RS(instr)] + (offset / 4);
+            uint32_t address = mips->regs[GET_RS(instr)] + offset;
             CHECK_MEM_ADDR(offset, address);
-            uint16_t byte = mem_read_byte(mips, address, false);
+            uint8_t byte = mem_read_byte(mips->memory, address);
 
             mips->regs[GET_RT(instr)] = sign_extend(byte, 16);
             break;
         }
         case OP_LHU: {
             int16_t offset = GET_IMMED(instr);
-            uint32_t address = mips->regs[GET_RS(instr)] + (offset / 4);
+            uint32_t address = mips->regs[GET_RS(instr)] + offset;
             CHECK_MEM_ADDR(offset, address);
 
-            mips->regs[GET_RT(instr)] = mem_read_half(mips, address, false);
+            mips->regs[GET_RT(instr)] = mem_read_half(mips->memory, address);
             break;
         }
         case OP_SB: {
             int16_t offset = GET_IMMED(instr);
-            uint32_t address = mips->regs[GET_RS(instr)] + (offset / 4);
+            uint32_t address = mips->regs[GET_RS(instr)] + offset;
             CHECK_MEM_ADDR(offset, address);
 
-            mem_write_byte(mips, address, mips->regs[GET_RT(instr)]);
+            mem_write_byte(mips->memory, address, mips->regs[GET_RT(instr)]);
 
             break;
         }
         case OP_SH: {
             int16_t offset = GET_IMMED(instr);
-            uint32_t address = mips->regs[GET_RS(instr)] + (offset / 4);
+            uint32_t address = mips->regs[GET_RS(instr)] + offset;
             CHECK_MEM_ADDR(offset, address);
 
-            mem_write_half(mips, address, mips->regs[GET_RT(instr)]);
+            mem_write_half(mips->memory, address, mips->regs[GET_RT(instr)]);
 
             break;
         }
@@ -361,29 +368,6 @@ ExecutionResult execInstruction(LMips* mips) {
     return EXEC_SUCCESS;
 }
 
-int32_t zero_extend(uint16_t x, int bit_count) {
-    return x | (0x00 << bit_count);
-}
-
-int32_t sign_extend(int16_t x, int bit_count) {
-    if ((x >> (bit_count - 1)) & 1) {
-        x |= (0xFFFF << bit_count);
-    }
-
-    return x;
-}
-
-int16_t sign_extend_byte(int8_t x, int bit_count) {
-    if ((x >> (bit_count - 1)) & 1) {
-        x |= (0x1F << bit_count);
-    }
-
-    return x;
-}
-
-int16_t zero_extend_byte(uint8_t x, int bit_count) {
-    return x | (0x00 << bit_count);
-}
 
 void handleException(ExecutionResult exc) {
     if (exc == EXEC_ERR_INT_OVERFLOW) {
@@ -391,30 +375,4 @@ void handleException(ExecutionResult exc) {
     } else if (exc == EXEC_ERR_MEMORY_ADDR) {
         fprintf(stderr, "Invalid memory address.\n");
     }
-}
-
-int32_t mem_read(LMips* mips, uint32_t address) {
-    return mips->memory[address];
-}
-
-int16_t mem_read_byte(LMips* mips, uint32_t address, bool sign) {
-    int16_t byte = mips->memory[address] & 0x1F;
-    return sign ? sign_extend_byte(byte, 8) : zero_extend_byte(byte, 8);
-}
-
-int32_t mem_read_half(LMips* mips, uint32_t address, bool sign) {
-    int32_t half = mips->memory[address] & 0xFFFF;
-    return sign ? sign_extend(half, 16) : zero_extend(half, 16);
-}
-
-void mem_write(LMips* mips, uint32_t address, int32_t value) {
-    mips->memory[address] = value;
-}
-
-void mem_write_byte(LMips* mips, uint32_t address, int32_t value) {
-    mips->memory[address] = value;
-}
-
-void mem_write_half(LMips* mips, uint32_t address, int32_t value) {
-    mips->memory[address] = value;
 }

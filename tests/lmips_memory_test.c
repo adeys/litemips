@@ -52,7 +52,7 @@ void testLbInstruction(CuTest* test) {
     };
 
     initSimulator(&mips, program);
-    mem_write_byte(&mips, mips.regs[$sp], 12);
+    mem_write_byte(mips.memory, mips.regs[$sp], 12);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
@@ -72,7 +72,7 @@ void testLhuInstruction(CuTest* test) {
     };
 
     initSimulator(&mips, program);
-    mem_write(&mips, mips.regs[$sp], -1200);
+    mem_write(mips.memory, mips.regs[$sp], -1200);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
@@ -96,7 +96,7 @@ void testSbInstruction(CuTest* test) {
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
-    CuAssertIntEquals(test,  mips.regs[$t0], mem_read(&mips, mips.regs[$sp]));
+    CuAssertIntEquals(test,  mips.regs[$t0], mem_read(mips.memory, mips.regs[$sp]));
 
     freeSimulator(&mips);
 }

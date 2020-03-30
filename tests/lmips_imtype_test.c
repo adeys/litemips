@@ -104,12 +104,12 @@ void testBlezInstruction(CuTest* test) {
     LMips mips;
 
     uint8_t program[] = {
-            0x18, 0x80, 0x00, 0x02, // blez $a0, 8
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL,
-            0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
-            0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
-            OP_SPECIAL, 0, 0, SPE_SYSCALL
+        0x18, 0x80, 0x00, 0x02, // blez $a0, 8
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL,
+        0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
+        0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
+        OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
     initSimulator(&mips, program);
