@@ -15,7 +15,7 @@ They are named following two differents conventions:
 
 | Register Number | Alternative Name | Description |
 |  :-----------:  |  :------------:  | :---------: |
-|   0   | zero | the value 0 |
+|   0   | $zero | the value 0 |
 |   1   | $at  | (assembler temporary) reserved by the assembler |
 |  2-3  | $v0 - $v1 | (values) from expression evaluation and function results |
 |  4-7  | $a0 - $a3 | (arguments) First four parameters for subroutine. Not preserved across procedure calls |
@@ -56,7 +56,7 @@ Following formats are possible
 
 - J-type formats 
 ~~~
-31       25                                  0
+31       25                                      0
 +--------+---------------------------------------+
 | OpCode |               Jump target             |
 +--------+---------------------------------------+
@@ -116,10 +116,10 @@ Following instructions are supported
 
 | Instruction | Opcode/Function | Syntax | Operation |
 | :---------: | :-------------: | :----: | :-------: |
-|   j   |  000010  |  o label  | pc += i << 2 |
-|  jal  |  000011  |  o label  |$31 = pc; pc += i << 2
-|  jalr |  001001  |  o labelR | $31 = pc; pc = $s |
-|   jr  |  001000  |  o labelR | pc = $s |
+|   j   |  000010  |  o index  | pc += i << 2 |
+|  jal  |  000011  |  o index  |$31 = pc; pc += i << 2
+|  jalr |  001001  |  f labelR | $31 = pc; pc = $s |
+|   jr  |  001000  |  f labelR | pc = $s |
 
 - Load Instructions
 

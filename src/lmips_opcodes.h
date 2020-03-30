@@ -3,6 +3,8 @@
 
 enum OpCodes {
     OP_SPECIAL,
+    OP_J = 0x02,
+    OP_JAL,
     OP_BEQ = 0x04,
     OP_BNE,
     OP_BLEZ,

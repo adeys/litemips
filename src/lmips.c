@@ -45,7 +45,6 @@ ExecutionResult runSimulator(LMips* mips) {
 }
 
 ExecutionResult execInstruction(LMips* mips) {
-
 #define GET_INSTR() \
     ((mips->program[mips->ip++] << 0x18) | \
         (mips->program[mips->ip++] << 0x10) | \
@@ -59,6 +58,7 @@ ExecutionResult execInstruction(LMips* mips) {
 #define GET_SA(instr) ((instr >> 0x06) & 0x1F)
 #define GET_FUNC(instr) (instr & 0x3F)
 #define GET_IMMED(instr) (instr & 0xFFFF)
+#define GET_JT(instr) (instr & 0x3FFFFFF)
 #define CHECK_OVERFLOW(x, y, op) \
     do { \
         int64_t res = (int64_t)x op y;\
@@ -102,6 +102,17 @@ ExecutionResult execInstruction(LMips* mips) {
                 case SPE_SRAV: {
                     uint8_t amount = mips->regs[GET_RS(instr)] & 0x1F;
                     mips->regs[GET_RD(instr)] = mips->regs[GET_RT(instr)] >> amount;
+                    break;
+                }
+                case SPE_JR: {
+                    uint32_t rs = mips->regs[GET_RS(instr)];
+                    mips->ip = rs;
+                    break;
+                }
+                case SPE_JALR: {
+                    uint8_t rd = GET_RD(instr);
+                    mips->regs[rd <= 0 ? $ra : rd] = mips->ip;
+                    mips->ip = mips->regs[GET_RS(instr)];
                     break;
                 }
                 case SPE_SYSCALL: {
@@ -185,6 +196,17 @@ ExecutionResult execInstruction(LMips* mips) {
                     return EXEC_FAILURE;
             }
 
+            break;
+        }
+        case OP_J: {
+            uint32_t jt = GET_JT(instr);
+            mips->ip = jt << 2;
+            break;
+        }
+        case OP_JAL: {
+            uint32_t jt = GET_JT(instr);
+            mips->regs[$ra] = mips->ip;
+            mips->ip = jt << 2;
             break;
         }
         case OP_ADDI: {

@@ -175,6 +175,55 @@ void testSltProgram(CuTest* test) {
     freeSimulator(&mips);
 }
 
+void testJrProgram(CuTest* test) {
+    LMips mips;
+
+    uint8_t program[] = {
+            0x00, 0x80, 0x00, 0x08, // jr $a0
+            OP_SPECIAL, 0, 0, SPE_SYSCALL,
+            0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
+            OP_SPECIAL, 0, 0, SPE_SYSCALL
+    };
+
+    initSimulator(&mips, program);
+    mips.regs[$a0] = 8;
+    mips.regs[$t0] = 15;
+    mips.regs[$t1] = 10;
+
+    ExecutionResult result = runSimulator(&mips);
+    CuAssertIntEquals(test, EXEC_SUCCESS, result);
+    CuAssertIntEquals(test, 16, mips.ip);
+    CuAssertIntEquals(test, 150, mips.lo);
+    CuAssertIntEquals(test, 0, mips.hi);
+
+    freeSimulator(&mips);
+}
+
+void testJalrProgram(CuTest* test) {
+    LMips mips;
+
+    uint8_t program[] = {
+            0x00, 0x80, 0x00, 0x09, // jalr $a0
+            OP_SPECIAL, 0, 0, SPE_SYSCALL,
+            0x01, 0x09, 0x10, SPE_MULT, // mult $t0, $t1
+            OP_SPECIAL, 0, 0, SPE_SYSCALL
+    };
+
+    initSimulator(&mips, program);
+    mips.regs[$a0] = 8;
+    mips.regs[$t0] = 15;
+    mips.regs[$t1] = 10;
+
+    ExecutionResult result = runSimulator(&mips);
+    CuAssertIntEquals(test, EXEC_SUCCESS, result);
+    CuAssertIntEquals(test, 16, mips.ip);
+    CuAssertIntEquals(test, 4, mips.regs[$ra]);
+    CuAssertIntEquals(test, 150, mips.lo);
+    CuAssertIntEquals(test, 0, mips.hi);
+
+    freeSimulator(&mips);
+}
+
 CuSuite* getLMipsRTypeInstructionsSuite() {
     CuSuite* suite = CuSuiteNew();
 
@@ -188,6 +237,8 @@ CuSuite* getLMipsRTypeInstructionsSuite() {
     SUITE_ADD_TEST(suite, testSraProgram);
     SUITE_ADD_TEST(suite, testSllvProgram);
     SUITE_ADD_TEST(suite, testSltProgram);
+    SUITE_ADD_TEST(suite, testJrProgram);
+    SUITE_ADD_TEST(suite, testJalrProgram);
 
     return suite;
 }
