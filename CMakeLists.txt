@@ -5,12 +5,12 @@ set(CMAKE_C_STANDARD 11)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
-file(GLOB SOURCE_FILES "src/*.c")
+file(GLOB SOURCE_FILES "src/*.c" "src/*/*.c")
 
-include_directories("src")
+include_directories("src" "src/assembler")
 add_executable(${PROJECT_NAME} main.c ${SOURCE_FILES})
 
-file(GLOB TEST_SOURCES "src/*.c" "tests/*.c" "tests/lib/*.c")
-add_executable(${PROJECT_NAME}_test ${TEST_SOURCES})
+file(GLOB TEST_SOURCES "tests/*.c" "tests/*/*.c")
+add_executable(${PROJECT_NAME}_test ${SOURCE_FILES} ${TEST_SOURCES})
 target_include_directories(${PROJECT_NAME}_test PUBLIC "src" "tests/lib")
 target_compile_definitions(${PROJECT_NAME}_test PUBLIC -DLMIPS_TEST)
