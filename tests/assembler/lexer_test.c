@@ -84,6 +84,9 @@ void testTokenizeValidProgram(CuTest* test) {
     CuAssertIntEquals(test, STATE_OK, lexer.state);
     CuAssertIntEquals(test, 21, lexer.tokens.count);
     CuAssertIntEquals(test, 16, lexer.line);
+    CuAssertIntEquals(test, T_DIRECTIVE, lexer.tokens.tokens[0].type);
+    CuAssertIntEquals(test, T_INSTRUCTION, lexer.tokens.tokens[2].type);
+    CuAssertIntEquals(test, T_IDENTIFIER, lexer.tokens.tokens[5].type);
 
     freeLexer(&lexer);
 }
@@ -106,6 +109,25 @@ void testTokenizeInvalidProgram(CuTest* test) {
     freeLexer(&lexer);
 }
 
+void testTokenizeInvalidDirectiveProgram(CuTest* test) {
+    Lexer lexer;
+    initLexer(&lexer);
+
+    const char* program = "# If $t0 > $t1, branch to t0_bigger,\n"
+                          "bgt $t0, $t1, t0_bigger\n"
+                          "move $t2, $t1 # otherwise, copy $t1 into $t2.\n"
+                          "b endif # and then branch to endif\n"
+                          ".invalid\n"
+                          "t0_bigger:\n"
+                          "move $t2, $t0 # copy $t0 into $t2\n"
+                          "endif: 0x12 >= 15";
+    tokenize(&lexer, program);
+
+    CuAssertIntEquals(test, STATE_ERROR, lexer.state);
+
+    freeLexer(&lexer);
+}
+
 CuSuite* getLexerTestSuite() {
     CuSuite* suite = CuSuiteNew();
 
@@ -114,6 +136,7 @@ CuSuite* getLexerTestSuite() {
     SUITE_ADD_TEST(suite, testTokenizeNumber);
     SUITE_ADD_TEST(suite, testTokenizeValidProgram);
     SUITE_ADD_TEST(suite, testTokenizeInvalidProgram);
+    SUITE_ADD_TEST(suite, testTokenizeInvalidDirectiveProgram);
 
     return suite;
 }

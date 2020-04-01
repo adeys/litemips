@@ -22,11 +22,4 @@ void initLexer(Lexer* lexer);
 void tokenize(Lexer* lexer, const char* program);
 void freeLexer(Lexer* lexer);
 
-char peek(Lexer* lexer);
-char advance(Lexer* lexer);
-bool isAtEnd(Lexer* lexer);
-void skipWhitespace(Lexer*);
-Token getNextToken(Lexer*);
-Token makeToken(TokenType type, Lexer* lexer);
-
 #endif //LMIPS_LEXER

@@ -17,6 +17,7 @@ typedef enum {
     T_LABEL,
     T_REGISTER,
     T_IDENTIFIER,
+    T_INSTRUCTION,
     T_EOF,
     T_ERROR
 } TokenType;
@@ -29,6 +30,7 @@ typedef struct {
     union {
         char* string;
         int32_t scalar;
+        int32_t type;
     } value;
 } Token;
 
