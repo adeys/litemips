@@ -5,7 +5,7 @@
 
 void testSimulatorInit(CuTest* test) {
     LMips mips;
-    initSimulator(&mips, NULL);
+    initTestSimulator(&mips, NULL);
 
     for (int i = 0; i < REG_COUNT; ++i) {
         CuAssertIntEquals(test,  i == $sp ? STACK_OFFSET : (i == $gp ? DATA_OFFSET : 0) , mips.regs[i]);
@@ -16,7 +16,7 @@ void testSimulatorInit(CuTest* test) {
 
 void testRunNullProgram(CuTest* test) {
     LMips mips;
-    initSimulator(&mips, NULL);
+    initTestSimulator(&mips, NULL);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_FAILURE, result);
@@ -30,7 +30,7 @@ void testRunInvalidProgram(CuTest* test) {
         1, 0, 0, 0
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_FAILURE, result);
@@ -45,7 +45,7 @@ void testRunValidProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
@@ -63,7 +63,7 @@ void testAddProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$t0] = 45;
     mips.regs[$t1] = 15;
 
@@ -83,7 +83,7 @@ void testDivProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$t0] = 45;
     mips.regs[$t1] = 15;
 
@@ -105,7 +105,7 @@ void testMfloProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$t0] = 15;
     mips.regs[$t1] = 10;
 
@@ -128,7 +128,7 @@ void testSraProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$t0] = 1;
     mips.regs[$t1] = 2;
 
@@ -150,7 +150,7 @@ void testSllvProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$t0] = 1;
     mips.regs[$t1] = 2;
 
@@ -171,7 +171,7 @@ void testSltProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$t0] = 1;
     mips.regs[$t1] = 2;
 
@@ -194,7 +194,7 @@ void testJrProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$a0] = 12;
     mips.regs[$t0] = 15;
     mips.regs[$t1] = 10;
@@ -220,7 +220,7 @@ void testJalrProgram(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$a0] = 12;
     mips.regs[$t0] = 15;
     mips.regs[$t1] = 10;

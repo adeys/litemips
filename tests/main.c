@@ -5,10 +5,9 @@ CuSuite* getLMipsRTypeInstructionsSuite();
 CuSuite* getLMipsITypeInstructionsSuite();
 CuSuite* getLMipsJTypeInstructionsSuite();
 CuSuite* getLMipsMemoryInstructionsSuite();
-CuSuite* getLexerTestSuite();
 
 int main(int argc, char const *argv[]) {
-    printf("Welcome to Lite VM test suite.\n\n");
+    printf("Welcome to Lite MIPS test suite.\n\n");
 
     CuString *output = CuStringNew();
     CuSuite* suite = CuSuiteNew();
@@ -17,7 +16,6 @@ int main(int argc, char const *argv[]) {
     CuSuiteAddSuite(suite, getLMipsITypeInstructionsSuite());
     CuSuiteAddSuite(suite, getLMipsJTypeInstructionsSuite());
     CuSuiteAddSuite(suite, getLMipsMemoryInstructionsSuite());
-    CuSuiteAddSuite(suite, getLexerTestSuite());
 
     CuSuiteRun(suite);
     CuSuiteSummary(suite, output);

@@ -13,7 +13,7 @@ void testLoadInvalidMemoryAddressInstruction(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_ERR_MEMORY_ADDR, result);
@@ -32,7 +32,7 @@ void testInvalidMemoryOffsetInstruction(CuTest* test) {
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_ERR_MEMORY_ADDR, result);
@@ -51,7 +51,7 @@ void testLbInstruction(CuTest* test) {
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mem_write_byte(mips.memory, mips.regs[$sp], 12);
 
     ExecutionResult result = runSimulator(&mips);
@@ -71,8 +71,8 @@ void testLhuInstruction(CuTest* test) {
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
-    mem_write(mips.memory, mips.regs[$sp], -1200);
+    initTestSimulator(&mips, program);
+    mem_write_half(mips.memory, mips.regs[$sp], -1200);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
@@ -91,12 +91,12 @@ void testSbInstruction(CuTest* test) {
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$t0] = 120;
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
-    CuAssertIntEquals(test,  mips.regs[$t0], mem_read(mips.memory, mips.regs[$sp]));
+    CuAssertIntEquals(test,  mips.regs[$t0], mem_read_byte(mips.memory, mips.regs[$sp]));
 
     freeSimulator(&mips);
 }

@@ -17,7 +17,7 @@ void resetSimulator(LMips* mips) {
     }
 }
 
-void initSimulator(LMips* mips, uint8_t* program) {
+void initTestSimulator(LMips* mips, uint8_t* program) {
     resetSimulator(mips);
     mips->regs[$sp] = STACK_OFFSET;
     mips->regs[$gp] = DATA_OFFSET;
@@ -26,6 +26,15 @@ void initSimulator(LMips* mips, uint8_t* program) {
     Memory memory;
     initMemory(&memory);
     mips->memory = &memory;
+}
+
+void initSimulator(LMips* mips, Memory* memory) {
+    resetSimulator(mips);
+    mips->regs[$sp] = STACK_OFFSET;
+    mips->regs[$gp] = DATA_OFFSET;
+    mips->program = &memory->store[PROGRAM_OFFSET];
+
+    mips->memory = memory;
 }
 
 void freeSimulator(LMips* mips) {
@@ -347,7 +356,7 @@ ExecutionResult execInstruction(LMips* mips) {
             uint32_t address = mips->regs[GET_RS(instr)] + offset;
             CHECK_MEM_ADDR(offset, address);
 
-            mem_write_byte(mips->memory, address, mips->regs[GET_RT(instr)]);
+            mem_write_byte(mips->memory, address, (uint8_t)mips->regs[GET_RT(instr)]);
 
             break;
         }
@@ -357,6 +366,15 @@ ExecutionResult execInstruction(LMips* mips) {
             CHECK_MEM_ADDR(offset, address);
 
             mem_write_half(mips->memory, address, mips->regs[GET_RT(instr)]);
+
+            break;
+        }
+        case OP_SW: {
+            int16_t offset = GET_IMMED(instr);
+            uint32_t address = mips->regs[GET_RS(instr)] + offset;
+            CHECK_MEM_ADDR(offset, address);
+
+            mem_write(mips->memory, address, mips->regs[GET_RT(instr)]);
 
             break;
         }

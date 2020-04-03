@@ -15,10 +15,10 @@ void freeMemory(Memory* memory) {
 }
 
 int32_t mem_read(Memory* memory, uint32_t address) {
-    return memory->store[address] |
-        (memory->store[address + 1] << 0x08) |
-        (memory->store[address + 2] << 0x10) |
-        (memory->store[address + 3] << 0x18);
+    return memory->store[address + 3] |
+           (memory->store[address + 2] << 0x08) |
+           (memory->store[address + 1] << 0x10) |
+           (memory->store[address] << 0x18);
 }
 
 uint8_t mem_read_byte(Memory* memory, uint32_t address) {
@@ -26,21 +26,21 @@ uint8_t mem_read_byte(Memory* memory, uint32_t address) {
 }
 
 uint16_t mem_read_half(Memory* memory, uint32_t address) {
-    return memory->store[address] | (memory->store[address + 1] << 0x08);
+    return memory->store[address + 1] | (memory->store[address] << 0x08);
 }
 
 void mem_write(Memory* memory, uint32_t address, uint32_t value) {
-    memory->store[address] = value;
-    memory->store[address + 1] = (uint8_t)(value >> 0x08);
-    memory->store[address + 2] = (uint8_t)(value >> 0x10);
-    memory->store[address + 3] = (uint8_t)(value >> 0x18);
+    memory->store[address + 3] = value;
+    memory->store[address + 2] = (uint8_t)(value >> 0x08);
+    memory->store[address + 1] = (uint8_t)(value >> 0x10);
+    memory->store[address] = (uint8_t)(value >> 0x18);
 }
 
 void mem_write_byte(Memory* memory, uint32_t address, uint8_t value) {
     memory->store[address] = value;
-    memory->store[address + 1] = (uint8_t)(value >> 0x08);
 }
 
 void mem_write_half(Memory* memory, uint32_t address, uint16_t value) {
-    memory->store[address] = value;
+    memory->store[address + 1] = value;
+    memory->store[address] = (uint8_t)(value >> 0x08);
 }

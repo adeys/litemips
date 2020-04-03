@@ -1,7 +1,7 @@
 Lite Mips Simulator (LMS)
 --------------------------
 
-Lite Mips Simulator is a MIPS subset implementation.
+Lite Mips Simulator is a MIPS inspired (subset implementation) VM/CPU implementation.
 
 ## Registers
 **LMS** has :
@@ -137,6 +137,7 @@ Following instructions are supported
 | :---------: | :-------------: | :----: | :-------: |
 |   sb   |  101000  |  o $t, i  | ($s) MEM [$s + i]:1 = LB ($t) |
 |   sh   |  101001  |  o $t, i  | ($s) MEM [$s + i]:2 = LH ($t) |
+|   sw   |  101010  |  o $t, i  | ($s) MEM [$s + i]:4 = LW ($t) |
 
 - Data Movement Instructions
 
@@ -157,3 +158,36 @@ Following instructions are supported
 The **LMS** will consist of two main components:
 - The assembler : That will translate program from assembly to runnable code (machine/byte code)
 - The virtual machine (that we can call MIPS CPU) that will run the generated code
+
+## Executable file format
+The **LMS** executable file has the following format:
+- File header
+- Sections
+- String Table
+- Section Header Table
+
+### File header
+It consists of several parts, each having a predefined size :
+- A magic number : 32-bit : [0x10, L, E, F]
+- Target major version : 8-bit
+- Target minor version : 8-bit
+- Entry point virtual-address : 32-bit Program entry point's file offset in bytes
+- Section Header Table's virtual-address : 32-bit SHT's file offset in bytes
+- Section Header count : 8-bit
+
+### Sections
+It contains all defined sections storing them contiguously to each other
+
+### String Table
+It's a 1-dimensional array holding the null-terminated string objects in the program.
+Its offset 0 as well as its last offset must contain '\0' to guarantee all strings are null-terminated.
+
+### Section Header Table
+An array of all sections header each one having the following structure:
+- Name(16-bit) : It specifies the section name. Its value is an index into the String Table.
+- Type(8-bit) : One of the following : 
+    - SHT_EXEC (0x01) : Contains executable code
+    - SHT_STRTAB (0x02) : Contains string table
+    - SHT_ALLOC (0x03) : Contains program data
+- Offset(32-bit) : Section first byte offset from the beginning of the file
+- Size(32-bit) : Section size

@@ -15,7 +15,7 @@ void testJProgram(CuTest* test) {
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$a0] = 12;
     mips.regs[$t0] = 15;
     mips.regs[$t1] = 10;
@@ -41,7 +41,7 @@ void testJalProgram(CuTest* test) {
             OP_SPECIAL, 0, 0, SPE_SYSCALL
     };
 
-    initSimulator(&mips, program);
+    initTestSimulator(&mips, program);
     mips.regs[$t0] = 15;
     mips.regs[$t1] = 10;
 

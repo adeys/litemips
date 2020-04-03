@@ -22,7 +22,8 @@ enum OpCodes {
     OP_LBU,
     OP_LHU,
     OP_SB = 0x28,
-    OP_SH
+    OP_SH,
+    OP_SW
 };
 
 enum SpecialCodes {

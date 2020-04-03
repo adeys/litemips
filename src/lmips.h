@@ -23,7 +23,8 @@ typedef enum {
 
 typedef struct lm LMips;
 
-void initSimulator(LMips* mips, uint8_t* program);
+void initTestSimulator(LMips* mips, uint8_t* program);
+void initSimulator(LMips* mips, Memory* memory);
 void freeSimulator(LMips* mips);
 ExecutionResult runSimulator(LMips* mips);
 ExecutionResult execInstruction(LMips* mips);
