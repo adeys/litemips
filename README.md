@@ -188,6 +188,6 @@ An array of all sections header each one having the following structure:
 - Type(8-bit) : One of the following : 
     - SHT_EXEC (0x01) : Contains executable code
     - SHT_STRTAB (0x02) : Contains string table
-    - SHT_ALLOC (0x04) : Contains program data
+    - SHT_ALLOC (0x04 ) : Contains program data
 - Offset(32-bit) : Section first byte offset from the beginning of the file
 - Size(32-bit) : Section size

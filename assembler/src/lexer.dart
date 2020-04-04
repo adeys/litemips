@@ -225,7 +225,7 @@ class Lexer {
       return;
     }
 
-    addToken(TokenType.T_REGISTER, register);
+    addToken(TokenType.T_REGISTER, registers.indexOf(register));
   }
 
   void getString() {

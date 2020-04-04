@@ -176,257 +176,79 @@ class Assembler {
     for (Instruction instr in assembly.instructions) {
       switch (instr.name) {
         case "add":
-          {
-            var tgt = instr.operands[2].value;
-            if (instr.operands[2].type == TokenType.T_SCALAR) {
+        case "addu":
+        case "and":
+        case "nor":
+        case "or":
+        case "sub":
+        case "subu":
+        case "xor":
+        case "slt":
+        case "sltu": {
+            int tgt = instr.rt.value;
+            if (instr.rt.type == TokenType.T_SCALAR) {
               // addi $at, $zero, immed
-              tgt = "\$at";
-              this.emitImmediate(0x08, getRegister("\$zero"), getRegister(tgt),
-                  instr.operands[2].value);
+              tgt = getRegister("\$at");
+              this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
             }
-            this.emitSpecial(0x20, getRegister(instr.operands[1].value),
-                getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
+            this.emitSpecial(instr.name, instr.rs.value, tgt, instr.rd.value, 0x00);
             break;
           }
-        case "addi": {
-          this.emitImmediate(0x08, getRegister(instr.operands[1].value), getRegister(instr.operands[0].value),
-              instr.operands[2].value);
+        case "addi":
+        case "addiu":
+        case "andi":
+        case "ori":
+        case "xori":
+        case "slti":
+        case "sltiu": {
+          this.emitImmediate(instr.name, instr.rs.value, instr.rt.value, instr.immed.value);
           break;
         }
-        case "addiu": {
-          this.emitImmediate(0x09, getRegister(instr.operands[1].value), getRegister(instr.operands[0].value),
-              instr.operands[2].value);
-          break;
-        }
-        case "addu": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addiu $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x21, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "and": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addi $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x08, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x24, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "andi": {
-          this.emitImmediate(0x0C, getRegister(instr.operands[1].value), getRegister(instr.operands[0].value),
-              instr.operands[2].value);
-          break;
-        }
-        case "div": {
-          this.emitSpecial(0x1A, getRegister(instr.operands[0].value),
-              getRegister(instr.operands[1].value), 0x00, 0x00);
-          break;
-        }
-        case "divu": {
-          this.emitSpecial(0x1B, getRegister(instr.operands[0].value),
-              getRegister(instr.operands[1].value), 0x00, 0x00);
-          break;
-        }
-        case "mult": {
-          this.emitSpecial(0x18, getRegister(instr.operands[0].value),
-              getRegister(instr.operands[1].value), 0x00, 0x00);
-          break;
-        }
+        case "div":
+        case "divu":
+        case "mult":
         case "multu": {
-          this.emitSpecial(0x19, getRegister(instr.operands[0].value),
-              getRegister(instr.operands[1].value), 0x00, 0x00);
+          this.emitSpecial(instr.name, instr.rs.value, instr.rt.value, 0x00, 0x00);
           break;
         }
-        case "neg": {
-          // neg rd, rs -> sub rd, zero, src
-          this.emitSpecial(0x22, getRegister("\$zero"), getRegister(instr.operands[1].value), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
+        case "neg":
         case "negu": {
-          // negu rd, rs -> sub rd, zero, src
-          this.emitSpecial(0x23, getRegister("\$zero"), getRegister(instr.operands[1].value), getRegister(instr.operands[0].value), 0x00);
+          this.emitSpecial(instr.name.endsWith("u") ? "subu" : "sub", getRegister("\$zero"), instr.rt.value, instr.rs.value, 0x00);
           break;
         }
-        case "nor": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addi $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x27, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "or": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addi $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x08, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x25, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "ori": {
-          this.emitImmediate(0x0D, getRegister(instr.operands[1].value), getRegister(instr.operands[0].value),
-              instr.operands[2].value);
-          break;
-        }
-        case "rem": {
-          // rem rd, rs, rt -> div rs, rt ; mfhi rd
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addi $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x1A, getRegister(instr.operands[1].value),
-              getRegister(tgt), 0x00, 0x00);
-          this.emitSpecial(0x10, 0x00, 0x00, getRegister(instr.operands[1].value), 0x00);
-          break;
-        }
+        case "rem":
         case "remu": {
           // remu rd, rs, rt -> divu rs, rt ; mfhi rd
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
+          var tgt = instr.rt.value;
+          if (instr.rt.type == TokenType.T_SCALAR) {
             // addi $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
+            tgt = getRegister("\$at");
+            this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
           }
-          this.emitSpecial(0x1B, getRegister(instr.operands[1].value),
-              getRegister(tgt), 0x00, 0x00);
-          this.emitSpecial(0x10, 0x00, 0x00, getRegister(instr.operands[1].value), 0x00);
+          this.emitSpecial(instr.name.endsWith("u") ? "divu" : "div", instr.rs.value, tgt, 0x00, 0x00);
+          this.emitSpecial("mfhi", 0x00, 0x00, instr.rd.value, 0x00);
           break;
         }
-        case "sll": {
-          this.emitSpecial(0x00, 0x00, getRegister(instr.operands[1].value),
-              getRegister(instr.operands[0].value), instr.operands[2].value);
-          break;
-        }
-        case "sllv": {
-          this.emitSpecial(0x04, getRegister(instr.operands[2].value),
-              getRegister(instr.operands[1].value), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "sra": {
-          this.emitSpecial(0x03, 0x00, getRegister(instr.operands[1].value),
-              getRegister(instr.operands[0].value), instr.operands[2].value);
-          break;
-        }
-        case "srav": {
-          this.emitSpecial(0x07, getRegister(instr.operands[1].value),
-              getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
+        case "sll":
+        case "sra":
         case "srl": {
-          this.emitSpecial(0x02, 0x00, getRegister(instr.operands[1].value),
-              getRegister(instr.operands[0].value), instr.operands[2].value);
+          this.emitSpecial(instr.name, 0x00, instr.rs.value, instr.rt.value, instr.immed.value);
           break;
         }
+        case "sllv":
+        case "srav":
         case "srlv": {
-          this.emitSpecial(0x06, getRegister(instr.operands[1].value),
-              getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "sub": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addi $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x08, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x22, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "subu": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addiu $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x23, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "xor": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addiu $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x26, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "xori": {
-          this.emitImmediate(0x0E, getRegister(instr.operands[1].value), getRegister(instr.operands[0].value),
-              instr.operands[2].value);
+          this.emitSpecial(instr.name, instr.rt.value, instr.rs.value, instr.rd.value, 0x00);
           break;
         }
         case "li": {
-          this.emitImmediate(0x09, getRegister("\$zero"), getRegister(instr.operands[0].value),
-              instr.operands[1].value);
-          break;
-        }
-        case "slt": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addiu $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x2A, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "sltu": {
-          var tgt = instr.operands[2].value;
-          if (instr.operands[2].type == TokenType.T_SCALAR) {
-            // addiu $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[2].value);
-          }
-          this.emitSpecial(0x2B, getRegister(instr.operands[1].value),
-              getRegister(tgt), getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
-        case "slti": {
-          this.emitImmediate(0x0A, getRegister(instr.operands[1].value), getRegister(instr.operands[0].value),
-              instr.operands[2].value);
-          break;
-        }
-        case "sltiu": {
-          this.emitImmediate(0x0B, getRegister(instr.operands[1].value), getRegister(instr.operands[0].value),
-              instr.operands[2].value);
+          this.emitImmediate("addiu", 0x00, instr.rt.value, instr.immed.value);
           break;
         }
         case "b":
-        case "j":{
-          Token label = instr.operands[0];
+        case "j":
+        case "jal": {
+          Token label = instr.immed;
           int address;
           if (label.type == TokenType.T_IDENTIFIER) {
             if(!this.assembly.labels.containsKey(label.value)) {
@@ -438,35 +260,15 @@ class Assembler {
             address = ((label.value as int) >> 2) & 0x03FFFFFF;
           }
 
-          this.emitJInstruction(0x02, address);
+          this.emitJInstruction(OpCodes[instr.name == "b" ? "j" : instr.name], address);
           break;
         }
-        case "beq": {
-          Token label = instr.operands[2];
-          int address;
-          if (label.type == TokenType.T_IDENTIFIER) {
-            if(!this.assembly.labels.containsKey(label.value)) {
-              throw new AssemblerError(label, "Undefined label '${label.value}'.");
-            }
-
-            address = this.assembly.labels[label.value].address >> 2;
-          } else {
-            address = ((label.value as int) >> 2) & 0x03FFFFFF;
-          }
-
-          String tgt = instr.operands[1].value;
-          if (instr.operands[1].type == TokenType.T_SCALAR) {
-            // addiu $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[1].value);
-          }
-
-          this.emitImmediate(0x04, getRegister(instr.operands[0].value), getRegister(tgt), address - this.offset - 1);
-          break;
-        }
+        case "beq":
         case "bne": {
-          Token label = instr.operands[2];
+          // Adjust bindings
+          Token tmp = instr.rs; instr.rs = instr.rt; instr.rt = tmp;
+
+          Token label = instr.immed;
           int address;
           if (label.type == TokenType.T_IDENTIFIER) {
             if(!this.assembly.labels.containsKey(label.value)) {
@@ -478,35 +280,32 @@ class Assembler {
             address = ((label.value as int) >> 2) & 0x03FFFFFF;
           }
 
-          String tgt = instr.operands[1].value;
-          if (instr.operands[1].type == TokenType.T_SCALAR) {
+          var tgt = instr.rt.value;
+          if (instr.rt.type == TokenType.T_SCALAR) {
             // addiu $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[1].value);
+            tgt = getRegister("\$at");
+            this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
           }
 
-          this.emitImmediate(0x05, getRegister(instr.operands[0].value), getRegister(tgt), address - this.offset - 1);
+          this.emitImmediate(instr.name, instr.rs.value, tgt, address - this.offset - 1);
           break;
         }
         case "blt": {
           // blt rs, rt, label -> slt $at, rs, rt ; bne $at, $zero, label;
 
           // slt $at, rs, rt
-          var tgt = instr.operands[1].value;
-          if (instr.operands[1].type == TokenType.T_SCALAR) {
+          var tgt = instr.rt.value;
+          if (instr.rt.type == TokenType.T_SCALAR) {
             // addiu $at, $zero, immed
-            tgt = "\$at";
-            this.emitImmediate(0x09, getRegister("\$zero"), getRegister(tgt),
-                instr.operands[1].value);
+            tgt = getRegister("\$at");
+            this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
           }
 
-          this.emitSpecial(0x2A, getRegister(instr.operands[0].value),
-              getRegister(tgt), getRegister("\$at"), 0x00);
+          this.emitSpecial("slt", instr.rs.value, tgt, getRegister("\$at"), 0x00);
 
           // bne $at, $zero, label
           int address;
-          var label = instr.operands[2];
+          var label = instr.immed;
           if (label.type == TokenType.T_IDENTIFIER) {
             if(!this.assembly.labels.containsKey(label.value)) {
               throw new AssemblerError(label, "Undefined label '${label.value}'.");
@@ -516,35 +315,19 @@ class Assembler {
           } else {
             address = ((label.value as int) >> 2) & 0x03FFFFFF;
           }
-          this.emitImmediate(0x05, getRegister("\$at"), getRegister("\$zero"), address - this.offset - 1);
-          break;
-        }
-        case "jal": {
-          Token label = instr.operands[0];
-          int address;
-          if (label.type == TokenType.T_IDENTIFIER) {
-            if(!this.assembly.labels.containsKey(label.value)) {
-              throw new AssemblerError(label, "Undefined label '${label.value}'.");
-            }
-
-            address = this.assembly.labels[label.value].address >> 2;
-          } else {
-            address = ((label.value as int) >> 2) & 0x03FFFFFF;
-          }
-
-          this.emitJInstruction(0x03, address);
+          this.emitImmediate("bne", getRegister("\$at"), 0x00, address - this.offset - 1);
           break;
         }
         case "jr": {
-          this.emitSpecial(0x08, getRegister(instr.operands[0].value), 0x00, 0x00, 0x00);
+          this.emitSpecial("jr", instr.rs.value, 0x00, 0x00, 0x00);
           break;
         }
         case "jalr": {
-          this.emitSpecial(0x09, getRegister(instr.operands[0].value), 0x00, getRegister(instr.operands[1].value), 0x00);
+          this.emitSpecial("jalr", instr.rt.value, 0x00, instr.rs.value, 0x00);
           break;
         }
         case "la": {
-          Token label = instr.operands[1];
+          Token label = instr.immed;
           int address;
           if(!this.assembly.labels.containsKey(label.value)) {
             throw new AssemblerError(label, "Undefined label '${label.value}'.");
@@ -552,63 +335,36 @@ class Assembler {
 
           address = this.assembly.labels[label.value].address;
           // addiu $rd, $gp, address
-          this.emitImmediate(0x09, getRegister("\$gp"), getRegister(instr.operands[0].value), address);
+          this.emitImmediate("addiu", getRegister("\$gp"), instr.rt.value, address);
           break;
         }
-        case "lb": {
-          this.emitImmediate(0x20, getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), instr.operands[1].value);
-          break;
-        }
-        case "lbu": {
-          this.emitImmediate(0x24, getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), instr.operands[1].value);
-          break;
-        }
-        case "lh": {
-          this.emitImmediate(0x21, getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), instr.operands[1].value);
-          break;
-        }
-        case "lhu": {
-          this.emitImmediate(0x25, getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), instr.operands[1].value);
-          break;
-        }
-        case "lw": {
-          this.emitImmediate(0x23, getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), instr.operands[1].value);
-          break;
-        }
-        case "sb": {
-          this.emitImmediate(0x28, getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), instr.operands[1].value);
-          break;
-        }
-        case "sh": {
-          this.emitImmediate(0x29, getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), instr.operands[1].value);
-          break;
-        }
+        case "lb":
+        case "lbu":
+        case "lh":
+        case "lhu":
+        case "lw":
+        case "sb":
+        case "sh":
         case "sw": {
-          this.emitImmediate(0x2b, getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), instr.operands[1].value);
+          this.emitImmediate(instr.name, instr.rs.value, instr.rt.value, instr.immed.value);
           break;
         }
         case "move": {
-          this.emitSpecial(0x20, getRegister("\$zero"), getRegister(instr.operands[1].value), getRegister(instr.operands[0].value), 0x00);
+          this.emitSpecial("add", 0x00, instr.rs.value, instr.rt.value, 0x00);
           break;
         }
-        case "mfhi": {
-          this.emitSpecial(0x10, 0x00, 0x00, getRegister(instr.operands[0].value), 0x00);
-          break;
-        }
+        case "mfhi":
         case "mflo": {
-          this.emitSpecial(0x12, 0x00, 0x00, getRegister(instr.operands[0].value), 0x00);
+          this.emitSpecial(instr.name, 0x00, 0x00, instr.rd.value, 0x00);
           break;
         }
-        case "mthi": {
-          this.emitSpecial(0x11, getRegister(instr.operands[0].value), 0x00, 0x00, 0x00);
-          break;
-        }
-        case "mfhi": {
-          this.emitSpecial(0x10, getRegister(instr.operands[0].value), 0x00, 0x00, 0x00);
+        case "mthi":
+        case "mtlo": {
+          this.emitSpecial(instr.name, instr.rs.value, 0x00, 0x00, 0x00);
           break;
         }
         case "syscall": {
-          this.emitSpecial(0x0C, 0x00, 0x00, 0x00, 0x00);
+          this.emitSpecial("syscall", 0x00, 0x00, 0x00, 0x00);
           break;
         }
         default:
@@ -622,18 +378,18 @@ class Assembler {
     this.emitWord(instr);
   }
 
-  void emitSpecial(int code, int rs, int rt, int rd, int shmt) {
+  void emitSpecial(String code, int rs, int rt, int rd, int shmt) {
     int instr = (0x00 << 26) |
         (rs << 21) |
         (rt << 16) |
         (rd << 11) |
         (shmt << 6) |
-        (code & 0x3F);
+        (OpCodes[code] & 0x3F);
     this.emitWord(instr);
   }
 
-  void emitImmediate(int code, int rs, int rt, int immed) {
-    int instr = (code << 26) | (rs << 21) | (rt << 16) | (immed & 0xFFFF);
+  void emitImmediate(String code, int rs, int rt, int immed) {
+    int instr = (OpCodes[code] << 26) | (rs << 21) | (rt << 16) | (immed & 0xFFFF);
     this.emitWord(instr);
   }
 

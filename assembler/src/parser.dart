@@ -139,15 +139,16 @@ class Parser {
       case "jalr":
       case "move":
         {
-          Token dest = expect(TokenType.T_REGISTER,
+          Token rs = expect(TokenType.T_REGISTER,
               "Expected register as '${token.value}' first operand.");
           expect(TokenType.T_COMMA, "Expected ',' between operands.");
-          Token src = expect(TokenType.T_REGISTER,
+          Token rt = expect(TokenType.T_REGISTER,
               "Expected register as '${token.value}' second operand.");
 
           Instruction instr =
               new Instruction(token.value, 2, InstructionType.R_TYPE);
-          instr.operands = [dest, src];
+          instr.rs = rs;
+          instr.rt = rt;
 
           this.assembly.addInstruction(instr);
           break;
@@ -193,6 +194,9 @@ class Parser {
           Instruction instr =
               new Instruction(token.value, 3, InstructionType.R_TYPE);
           instr.operands = [dest, src, tgt];
+          instr.rs = src;
+          instr.rd = dest;
+          instr.rt = tgt;
 
           this.assembly.addInstruction(instr);
           break;
@@ -221,7 +225,9 @@ class Parser {
 
           Instruction instr =
               new Instruction(token.value, 3, InstructionType.R_TYPE);
-          instr.operands = [dest, src, lbl];
+          instr.rs = dest;
+          instr.rt = src;
+          instr.immed = lbl;
 
           this.assembly.addInstruction(instr);
           break;
@@ -250,7 +256,9 @@ class Parser {
 
           Instruction instr =
               new Instruction(token.value, 3, InstructionType.I_TYPE);
-          instr.operands = [dest, src, imm];
+          instr.rs = src;
+          instr.rt = dest;
+          instr.immed = imm;
 
           this.assembly.addInstruction(instr);
           break;
@@ -266,6 +274,8 @@ class Parser {
           Instruction instr =
               new Instruction(token.value, 2, InstructionType.I_TYPE);
           instr.operands = [dest, imm];
+          instr.rt = dest;
+          instr.immed = imm;
 
           this.assembly.addInstruction(instr);
           break;
@@ -286,9 +296,9 @@ class Parser {
           Token lbl = expect(TokenType.T_IDENTIFIER,
               "Expected label as '${token.value}' second operand.");
 
-          Instruction instr =
-              new Instruction(token.value, 2, InstructionType.I_TYPE);
-          instr.operands = [dest, lbl];
+          Instruction instr = new Instruction(token.value, 2, InstructionType.I_TYPE);
+          instr.rt = dest;
+          instr.immed = lbl;
 
           this.assembly.addInstruction(instr);
           break;
@@ -317,7 +327,9 @@ class Parser {
 
           Instruction instr =
               new Instruction(token.value, 3, InstructionType.I_TYPE);
-          instr.operands = [tgt, offset, src];
+          instr.rs = src;
+          instr.rt = tgt;
+          instr.immed = offset;
 
           this.assembly.addInstruction(instr);
           break;
@@ -333,7 +345,11 @@ class Parser {
 
           Instruction instr =
               new Instruction(token.value, 1, InstructionType.J_TYPE);
-          instr.operands = [lbl];
+          if (token.value.toString().startsWith("mf")) {
+            instr.rd = lbl;
+          } else {
+            instr.rs = lbl;
+          }
 
           this.assembly.addInstruction(instr);
           break;
@@ -350,7 +366,7 @@ class Parser {
 
           Instruction instr =
               new Instruction(token.value, 1, InstructionType.J_TYPE);
-          instr.operands = [lbl];
+          instr.immed = lbl;
 
           this.assembly.addInstruction(instr);
           break;
