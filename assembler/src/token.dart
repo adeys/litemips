@@ -7,7 +7,6 @@ enum TokenType {
   // Constants
   T_STRING,
   T_SCALAR,
-  T_CHAR,
 
   // Keywords
   T_IDENTIFIER,

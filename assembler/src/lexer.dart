@@ -3,24 +3,127 @@ import 'dart:io';
 import 'token.dart';
 
 List<String> registers = [
-  "\$zero", "\$at", "\$v0", "\$v1", "\$a0", "\$a1", "\$a2", "\$a3",
-  "\$t0", "\$t1", "\$t2", "\$t3", "\$t4", "\$t5", "\$t6", "\$t7",
-  "\$s0", "\$s1", "\$s2", "\$s3", "\$s4", "\$s5", "\$s6", "\$s7",
-  "\$t8", "\$t9", "\$k0", "\$k1", "\$gp", "\$sp", "\$fp", "\$ra"
+  "\$zero",
+  "\$at",
+  "\$v0",
+  "\$v1",
+  "\$a0",
+  "\$a1",
+  "\$a2",
+  "\$a3",
+  "\$t0",
+  "\$t1",
+  "\$t2",
+  "\$t3",
+  "\$t4",
+  "\$t5",
+  "\$t6",
+  "\$t7",
+  "\$s0",
+  "\$s1",
+  "\$s2",
+  "\$s3",
+  "\$s4",
+  "\$s5",
+  "\$s6",
+  "\$s7",
+  "\$t8",
+  "\$t9",
+  "\$k0",
+  "\$k1",
+  "\$gp",
+  "\$sp",
+  "\$fp",
+  "\$ra"
 ];
 
 List<String> instructions = [
-  "abs", "add", "addi", "addu", "addiu", "and", "andi", "div", "divu", "mult",
-  "multu", "neg", "negu", "nor", "not", "or", "rem", "remu", "sll", "sllv""sra",
-  "srav", "srl", "srlv", "sub", "subu", "xor", "xori", "li", "slt", "sltu", "slti", 
-  "sltiu", "seq", "sge", "sgeu", "sgt", "sgtu", "sle", "sleu", "sne", "b", "beq", 
-  "bgez", "bgtz", "blez", "bltz", "bne", "beqz", "bge", "bgeu", "bgt", "bgtu", "ble", 
-  "bleu", "blt", "bltu", "bnez", "j", "jal", "jalr", "jr", "la", "lb", "lbu", "lh", 
-  "lhu", "lw", "sb", "sh", "move", "mfhi", "mflo", "mthi", "mtlo", "syscall",
+  "abs",
+  "add",
+  "addi",
+  "addu",
+  "addiu",
+  "and",
+  "andi",
+  "div",
+  "divu",
+  "mult",
+  "multu",
+  "neg",
+  "negu",
+  "nor",
+  "not",
+  "or",
+  "rem",
+  "remu",
+  "sll",
+  "sllv" "sra",
+  "srav",
+  "srl",
+  "srlv",
+  "sub",
+  "subu",
+  "xor",
+  "xori",
+  "li",
+  "slt",
+  "sltu",
+  "slti",
+  "sltiu",
+  "seq",
+  "sge",
+  "sgeu",
+  "sgt",
+  "sgtu",
+  "sle",
+  "sleu",
+  "sne",
+  "b",
+  "beq",
+  "bgez",
+  "bgtz",
+  "blez",
+  "bltz",
+  "bne",
+  "beqz",
+  "bge",
+  "bgeu",
+  "bgt",
+  "bgtu",
+  "ble",
+  "bleu",
+  "blt",
+  "bltu",
+  "bnez",
+  "j",
+  "jal",
+  "jalr",
+  "jr",
+  "la",
+  "lb",
+  "lbu",
+  "lh",
+  "lhu",
+  "lw",
+  "sb",
+  "sh",
+  "move",
+  "mfhi",
+  "mflo",
+  "mthi",
+  "mtlo",
+  "syscall",
 ];
 
 List<String> directives = [
-  ".text", ".data", ".ascii", ".asciiz", ".space", ".byte", ".half", ".word"
+  ".text",
+  ".data",
+  ".ascii",
+  ".asciiz",
+  ".space",
+  ".byte",
+  ".half",
+  ".word"
 ];
 
 class Lexer {
@@ -33,9 +136,9 @@ class Lexer {
   bool hadError = false;
 
   Lexer(this.program);
-  
+
   List<Token> tokenize() {
-    while(!this.isAtEnd()) {
+    while (!this.isAtEnd()) {
       getNextToken();
     }
 
@@ -50,29 +153,36 @@ class Lexer {
   void getNextToken() {
     this.start = this.position;
     String char = advance();
-    
+
     if (isAlpha(char)) return getIdentifier();
     if (isDigit(char)) return getScalar(char);
-    
-    switch(char) {
-      case "(": return addToken(TokenType.T_LPAREN, char);
-      case ")": return addToken(TokenType.T_RPAREN, char);
-      case ",": return addToken(TokenType.T_COMMA, char);
-      case ".": return getDirective();
-      case "\$": return getRegister();
-      case "\"": return getString();
-      case "#": {
-        while(peek() != "\n" && !isAtEnd()) advance();
-        break;
-      }
+
+    switch (char) {
+      case "(":
+        return addToken(TokenType.T_LPAREN, char);
+      case ")":
+        return addToken(TokenType.T_RPAREN, char);
+      case ",":
+        return addToken(TokenType.T_COMMA, char);
+      case ".":
+        return getDirective();
+      case "\$":
+        return getRegister();
+      case "\"":
+        return getString();
+      case "#":
+        {
+          while (peek() != "\n" && !isAtEnd()) advance();
+          break;
+        }
       case "\n":
-          line++;
-          return;
+        line++;
+        return;
       case " ":
       case "\t":
       case "\b":
       case "\r":
-          break;
+        break;
       default:
         reportError("Invalid token");
         break;
@@ -80,11 +190,13 @@ class Lexer {
   }
 
   void addToken(TokenType type, Object value) {
-    tokens.add(new Token(type, line, value));
+    Token token = new Token(type, line, value);
+    token.lexeme = this.program.substring(this.start, this.position);
+    tokens.add(token);
   }
 
   void getDirective() {
-    while(isAlphaNum(peek())) {
+    while (isAlphaNum(peek())) {
       advance();
     }
 
@@ -98,7 +210,7 @@ class Lexer {
   }
 
   void getRegister() {
-    while(isAlphaNum(peek())) {
+    while (isAlphaNum(peek())) {
       advance();
     }
 
@@ -119,12 +231,24 @@ class Lexer {
         advance();
         String char;
         switch (advance()) {
-          case 'n': char = '\n'; break;
-          case 't': char = '\t'; break;
-          case 'b': char = '\b'; break;
-          case 'r': char = '\r'; break;
-          case '\\': char = '\\'; break;
-          case '"': char = '"'; break;
+          case 'n':
+            char = '\n';
+            break;
+          case 't':
+            char = '\t';
+            break;
+          case 'b':
+            char = '\b';
+            break;
+          case 'r':
+            char = '\r';
+            break;
+          case '\\':
+            char = '\\';
+            break;
+          case '"':
+            char = '"';
+            break;
         }
         string.write(char);
       } else {
@@ -143,7 +267,7 @@ class Lexer {
   }
 
   void getIdentifier() {
-    while(isAlphaNum(peek())) {
+    while (isAlphaNum(peek())) {
       advance();
     }
 
@@ -165,13 +289,15 @@ class Lexer {
     if (first == "0" && peek().toUpperCase() == "X") {
       advance();
       // Get hex number;
-      while(isHexDigit(peek())) {
+      while (isHexDigit(peek())) {
         advance();
       }
-      value = int.parse(this.program.substring(this.start + 2, this.position), radix: 16);
+      value = int.parse(this.program.substring(this.start + 2, this.position),
+          radix: 16);
     } else {
-      while(isDigit(peek())) advance();
-      value = int.parse(this.program.substring(this.start, this.position), radix: 10);
+      while (isDigit(peek())) advance();
+      value = int.parse(this.program.substring(this.start, this.position),
+          radix: 10);
     }
 
     addToken(TokenType.T_SCALAR, value);
@@ -187,7 +313,7 @@ class Lexer {
   }
 
   String peek() {
-      return isAtEnd() ? '' : program[position];
+    return isAtEnd() ? '' : program[position];
   }
 
   String peekNext() {
@@ -209,5 +335,4 @@ class Lexer {
   bool isHexDigit(String char) {
     return isDigit(char) || new RegExp("[A-Fa-f]").hasMatch(char);
   }
-
 }
