@@ -64,7 +64,7 @@ class Assembler {
   Assembler(Assembly program) {
     this.assembly = program;
     int size = assembly.instructions.length * 4 + assembly.dataSize;
-    buffer = new Uint8List(size * 3);
+    buffer = new Uint8List(size * 10);
     offset = 15; // File header length
   }
 
@@ -320,8 +320,8 @@ class Assembler {
           break;
         }
         case "sllv": {
-          this.emitSpecial(0x04, getRegister(instr.operands[1].value),
-              getRegister(instr.operands[2].value), getRegister(instr.operands[0].value), 0x00);
+          this.emitSpecial(0x04, getRegister(instr.operands[2].value),
+              getRegister(instr.operands[1].value), getRegister(instr.operands[0].value), 0x00);
           break;
         }
         case "sra": {

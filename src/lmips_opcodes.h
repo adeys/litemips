@@ -35,7 +35,7 @@ enum SpecialCodes {
     SPE_SRAV,
     SPE_JR,
     SPE_JALR,
-    SPE_SYSCALL = 0x0D,
+    SPE_SYSCALL = 0x0C,
     SPE_MFHI = 0x10,
     SPE_MTHI,
     SPE_MFLO,

@@ -4,7 +4,31 @@
 #include "executable.h"
 #include "lmips.h"
 
-#define HEADER_SIZE 120
+#define HEADER_SIZE (120 / 8)
+
+uint32_t read_word(FILE* file) {
+    uint32_t word;
+    fread(&word, sizeof(uint32_t), 1, file);
+
+    return ((word & 0x000000FF) << 24) |
+        ((word & 0x0000FF00) << 8)  |
+        ((word & 0x00FF0000) >> 8) |
+        ((word & 0xFF000000) >> 24);
+}
+
+uint16_t read_half(FILE* file) {
+    uint16_t half;
+    fread(&half, sizeof(uint16_t), 1, file);
+
+    return (half >> 8) | (half << 8);
+}
+
+uint8_t read_byte(FILE* file) {
+    uint8_t byte;
+    fread(&byte, sizeof(uint8_t), 1, file);
+
+    return byte;
+}
 
 FileHeader getHeader(FILE* file, const char* fileName) {
     FileHeader header;
@@ -17,11 +41,11 @@ FileHeader getHeader(FILE* file, const char* fileName) {
         exit(1);
     }
 
-    fread(&header.major, sizeof(uint8_t), 1, file);
-    fread(&header.minor, sizeof(uint8_t), 1, file);
-    fread(&header.entry, sizeof(uint32_t), 1, file);
-    fread(&header.shAddress, sizeof(uint32_t), 1, file);
-    fread(&header.shCount, sizeof(uint8_t), 1, file);
+    header.major = read_byte(file);
+    header.minor = read_byte(file);
+    header.entry = read_word(file);
+    header.shAddress = read_word(file);
+    header.shCount = read_byte(file);
 
     header.size = HEADER_SIZE;
 
@@ -49,10 +73,10 @@ int main(int argc, char const *argv[]) {
     fseek(source, header.shAddress, SEEK_SET);
     for (int i = 0; i < header.shCount; ++i) {
         SectionHeader section;
-        fread(&section.name, sizeof(uint16_t), 1, source);
-        fread(&section.type, sizeof(uint8_t), 1, source);
-        fread(&section.address, sizeof(uint32_t), 1, source);
-        fread(&section.size, sizeof(uint32_t), 1, source);
+        section.name = read_half(source);
+        section.type = read_byte(source);
+        section.address = read_word(source);
+        section.size = read_word(source);
 
         sections[i] = section;
     }
@@ -67,24 +91,29 @@ int main(int argc, char const *argv[]) {
         fseek(source, section.address, SEEK_SET);
         switch (section.type) {
             case SHT_EXEC: {
-                for (int j = 0; j < section.size / sizeof(uint32_t); ++j) {
-                    uint32_t instr;
-                    fread(&instr, sizeof(uint32_t), 1, source);
+                for (int j = 0; j < section.size / 4; ++j) {
+                    uint32_t instr = read_word(source);
                     mem_write(&memory, programOffset, instr);
                     programOffset += 4;
                 }
                 break;
             }
             case SHT_ALLOC: {
-                for (int j = 0; j < section.size / sizeof(uint32_t); ++j) {
-                    uint32_t buffer;
-                    fread(&buffer, sizeof(uint32_t), 1, source);
+                for (int j = 0; j < section.size / 4; ++j) {
+                    uint32_t buffer = read_word(source);
                     mem_write(&memory, programOffset, buffer);
                     dataOffset += 4;
                 }
                 break;
             }
-            case SHT_STRTAB:
+            case SHT_STRTAB: {
+                for (int j = 0; j < section.size; ++j) {
+                    uint8_t buffer = read_byte(source);
+                    mem_write_byte(&memory, programOffset, buffer);
+                    dataOffset++;
+                }
+                break;
+            }
             case SHT_NULL:
                 break;
         }
@@ -94,6 +123,7 @@ int main(int argc, char const *argv[]) {
 
     LMips mips;
     initSimulator(&mips, &memory);
+    mips.ip = header.entry - header.size;
 
     runSimulator(&mips);
 

@@ -17,7 +17,7 @@ typedef enum {
     SHT_NULL,
     SHT_EXEC,
     SHT_STRTAB,
-    SHT_ALLOC
+    SHT_ALLOC = 0x04
 } SectionType;
 
 typedef struct {
