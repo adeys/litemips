@@ -1,11 +1,13 @@
 import 'dart:io';
+import 'dart:typed_data';
 
+import 'src/assembler.dart';
 import 'src/lexer.dart';
 import 'src/parser.dart';
 
 void main(List<String> argv) {
-  if (argv.length != 1) {
-    print("Usage : lasm [file]");
+  if (argv.length != 3) {
+    print("Usage : lasm [file] -o [output]");
     exit(1);
   }
 
@@ -24,4 +26,11 @@ void main(List<String> argv) {
   parser.parse();
 
   if (parser.hadError) exit(1);
+
+  Assembler assembler = new Assembler(parser.assembly);
+  Uint8List program = assembler.assemble();
+
+  File out = new File(argv[2]);
+  out.createSync();
+  out.writeAsBytesSync(program);
 }

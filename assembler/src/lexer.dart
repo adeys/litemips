@@ -107,6 +107,7 @@ List<String> instructions = [
   "lw",
   "sb",
   "sh",
+  "sw",
   "move",
   "mfhi",
   "mflo",
@@ -170,6 +171,8 @@ class Lexer {
         return getRegister();
       case "\"":
         return getString();
+      case "-":
+        return getScalar(advance(), true);
       case "#":
         {
           while (peek() != "\n" && !isAtEnd()) advance();
@@ -284,7 +287,7 @@ class Lexer {
     addToken(type, value);
   }
 
-  void getScalar(String first) {
+  void getScalar(String first, [bool negative = false]) {
     num value = 0;
     if (first == "0" && peek().toUpperCase() == "X") {
       advance();
@@ -300,6 +303,7 @@ class Lexer {
           radix: 10);
     }
 
+    value = negative ? -value : value;
     addToken(TokenType.T_SCALAR, value);
   }
 

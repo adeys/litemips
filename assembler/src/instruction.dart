@@ -1,3 +1,5 @@
+import 'token.dart';
+
 enum InstructionType {
   R_TYPE,
   RL_TYPE, // R_type based pseudo-instructions
@@ -8,7 +10,7 @@ enum InstructionType {
 class Instruction {
   String name;
   int opCount;
-  List<Object> operands;
+  List<Token> operands;
   InstructionType type;
 
   Instruction(this.name, this.opCount, this.type);

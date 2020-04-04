@@ -1,9 +1,6 @@
 import 'instruction.dart';
 
-enum Segment {
-  SGT_TEXT,
-  SGT_DATA
-}
+enum Segment { SGT_TEXT, SGT_DATA }
 
 class Label {
   String name;
@@ -23,7 +20,7 @@ class Directive {
 class Assembly {
   List<Instruction> instructions = [];
   List<Directive> directives = [];
-  List<Label> labels = [];
+  Map<String, Label> labels = {};
   int dataSize = 0;
 
   void addInstruction(Instruction instruction) {
@@ -31,7 +28,7 @@ class Assembly {
   }
 
   void addLabel(Label label) {
-    labels.add(label);
+    labels[label.name] = label;
   }
 
   void addDirective(Directive directive) {
