@@ -22,12 +22,15 @@ class Instruction {
 }
 
 const Map<String, int> OpCodes = {
+  "rsi": 0x01,
   "j": 0x02,
   "jal": 0x03,
   "beq": 0x04,
   "bne": 0x05,
   "blez": 0x06,
   "bgtz": 0x07,
+  "bltz": 0x00,
+  "bgez": 0x01,
   "addi": 0x08,
   "addiu": 0x09,
   "slti": 0x0A,

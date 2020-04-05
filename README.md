@@ -107,6 +107,8 @@ Following instructions are supported
 | :---------: | :-------------: | :----: | :-------: |
 |  beq  |  000100  | o $s, $t, offset | if ($s == $t) pc += i << 2 |
 |  bgtz |  000111  |   o $s, offset   | if ($s > 0) pc += i << 2 |
+|  bgez |  000001  |   o $s, offset   | if ($s >= 0) pc += i << 2 |
+|  bltz |  000000  |   o $s, offset   | if ($s < 0) pc += i << 2 |
 |  blez |  000110  |   o $s, offset   | if ($s <= 0) pc += i << 2 |
 |  bne  |  000101  | o $s, $t, offset | if ($s != $t) pc += i << 2 |
 

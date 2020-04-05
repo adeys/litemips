@@ -282,10 +282,8 @@ class Parser {
           break;
         }
       case "bgez":
-      case "bgezal":
       case "bgtz":
       case "blez":
-      case "bltzal":
       case "bltz":
       case "beqz":
       case "bnez":

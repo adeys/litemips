@@ -367,6 +367,11 @@ class Assembler {
           this.emitImmediate("bne", getRegister("\$at"), 0x00, address);
           break;
         }
+        case "bgez":
+        case "bltz": {
+          this.emitImmediate("rsi", instr.rt.value, OpCodes[instr.name], instr.immed.value);
+          break;
+        }
         case "jr": {
           this.emitSpecial("jr", instr.rs.value, 0x00, 0x00, 0x00);
           break;

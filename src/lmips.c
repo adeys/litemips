@@ -91,6 +91,11 @@ ExecutionResult execInstruction(LMips* mips) {
 #define BINU_OP(op) (mips->regs[GET_RD(instr)] = mips->regs[GET_RS(instr)] op mips->regs[GET_RT(instr)])
 #define CHECK_MEM_ADDR(offset, address) \
     if ((offset % 4 != 0) || address >= MEMORY_SIZE) return EXEC_ERR_MEMORY_ADDR
+#define COMP_OP(op) \
+    if ((int32_t)(mips->regs[GET_RS(instr)]) > 0) { \
+        uint32_t offset = GET_IMMED(instr) << 2; \
+        mips->ip += (offset - 4); \
+    }
 
     uint32_t instr = GET_INSTR();
     uint8_t op = GET_OP(instr);
@@ -242,6 +247,23 @@ ExecutionResult execInstruction(LMips* mips) {
 
             break;
         }
+        case OP_SRI: {
+            uint8_t rt = GET_RT(instr);
+            switch (rt) {
+                case SR_BLTZ: {
+                    COMP_OP(<)
+                    break;
+                }
+                case SR_BGEZ: {
+                    COMP_OP(>=)
+                    break;
+                }
+                default: {
+                    fprintf(stderr, "Unknown regimm instruction %d.", rt);
+                    return EXEC_FAILURE;
+                }
+            }
+        }
         case OP_J: {
             int32_t jt = GET_JT(instr);
             mips->ip = jt << 2;
@@ -268,17 +290,11 @@ ExecutionResult execInstruction(LMips* mips) {
             break;
         }
         case OP_BLEZ: {
-            if ((int32_t)(mips->regs[GET_RS(instr)]) <= 0) {
-                uint32_t offset = GET_IMMED(instr) << 2;
-                mips->ip += (offset - 4);
-            }
+            COMP_OP(<=)
             break;
         }
         case OP_BGTZ: {
-            if ((int32_t)(mips->regs[GET_RS(instr)]) >= 0) {
-                uint32_t offset = GET_IMMED(instr) << 2;
-                mips->ip += (offset - 4);
-            }
+            COMP_OP(>)
             break;
         }
         case OP_ADDI: {

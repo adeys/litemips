@@ -3,7 +3,8 @@
 
 enum OpCodes {
     OP_SPECIAL,
-    OP_J = 0x02,
+    OP_SRI,
+    OP_J,
     OP_JAL,
     OP_BEQ,
     OP_BNE,
@@ -63,6 +64,11 @@ enum SysCallCodes {
     SYS_READ_INT,
     SYS_READ_STRING = 0x08,
     SYS_EXIT = 0x0A
+};
+
+enum SriCodes {
+    SR_BLTZ,
+    SR_BGEZ
 };
 
 #endif // LMIPS_OPCODES
