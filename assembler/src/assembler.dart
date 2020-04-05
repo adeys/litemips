@@ -78,8 +78,8 @@ class Assembler {
 
     this.emitInstructions();
     this.emitInstructionHeader();
-    this.emitStringTable();
     this.emitDataSection();
+    this.emitStringTable();
     this.emitSectionHeaders();
     this.emitFileHeader();
 
@@ -104,20 +104,8 @@ class Assembler {
   void emitStringTable() {
     SectionHeader string = new SectionHeader(".string", 0x02, this.offset);
 
-    this.emitBytes("\0".codeUnits);
-    for(Directive directive in this.assembly.directives) {
-      if (directive.name == ".ascii") {
-        for(int i = 0; i < directive.operands.length; i++) {
-          this.emitBytes(directive.operands[i].toString().codeUnits);
-        }
-      } else if (directive.name == ".asciiz") {
-        for(int i = 0; i < directive.operands.length; i++) {
-          this.emitBytes(directive.operands[i].toString().codeUnits + "\0".codeUnits);
-        }
-      }
-    }
-
-    this.emitBytes("\0".codeUnits);
+    this.emitByte(0);
+    this.emitByte(0);
 
     string.size = this.offset - string.offset;
     headers.add(string);
@@ -126,22 +114,36 @@ class Assembler {
   void emitDataSection() {
     SectionHeader data = new SectionHeader(".data", 0x04, this.offset);
 
-    List<Directive> directives = this.assembly
-        .directives
-        .where((Directive direct) => direct.name != ".ascii" && direct.name != ".asciiz")
-        .toList();
-
     Map<String, Function> map = {
       ".byte": this.emitByte,
       ".half": this.emitHalf,
       ".word": this.emitWord
     };
 
-    directives.forEach((Directive directive) {
-      for(int i = 0; i < directive.operands.length; i++) {
-        map[directive.name](directive.operands[i]);
+    for (Directive directive in this.assembly.directives) {
+      switch(directive.name) {
+        case ".byte":
+        case ".half":
+        case ".word": {
+          for(int i = 0; i < directive.operands.length; i++) {
+            map[directive.name](directive.operands[i]);
+          }
+          break;
+        }
+        case ".ascii": {
+          for(int i = 0; i < directive.operands.length; i++) {
+            this.emitBytes(directive.operands[i].toString().codeUnits);
+          }
+          break;
+        }
+        case ".asciiz": {
+          for(int i = 0; i < directive.operands.length; i++) {
+            this.emitBytes(directive.operands[i].toString().codeUnits + [0]);
+          }
+          break;
+        }
       }
-    });
+    }
 
     data.size = this.offset - data.offset;
 
@@ -350,7 +352,7 @@ class Assembler {
           break;
         }
         case "move": {
-          this.emitSpecial("add", 0x00, instr.rs.value, instr.rt.value, 0x00);
+          this.emitSpecial("add", 0x00, instr.rt.value, instr.rs.value, 0x00);
           break;
         }
         case "mfhi":

@@ -304,7 +304,6 @@ class Lexer {
           radix: 10);
     }
 
-    value = negative ? -value : value;
     addToken(TokenType.T_SCALAR, value);
   }
 

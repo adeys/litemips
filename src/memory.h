@@ -9,7 +9,7 @@
 #define STACK_OFFSET 0x3FFFF0
 
 typedef struct {
-    uint8_t store[MEMORY_SIZE];
+    uint8_t* store;
 } Memory;
 
 void initMemory(Memory* memory);

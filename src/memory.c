@@ -1,17 +1,13 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include "memory.h"
 
-void resetMemory(Memory* memory) {
-    for (int i = 0; i < MEMORY_SIZE; ++i) {
-        memory->store[i] = 0;
-    }
-}
-
 void initMemory(Memory* memory) {
-    resetMemory(memory);
+    memory->store = realloc(NULL, MEMORY_SIZE * sizeof(uint8_t));
 }
 
 void freeMemory(Memory* memory) {
-    resetMemory(memory);
+    memory->store = realloc(memory->store, 0);
 }
 
 int32_t mem_read(Memory* memory, uint32_t address) {

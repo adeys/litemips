@@ -81,17 +81,18 @@ int main(int argc, char const *argv[]) {
         sections[i] = section;
     }
 
-    Memory memory;
+    Memory memory = {};
     initMemory(&memory);
     uint32_t programOffset = PROGRAM_OFFSET;
     uint32_t dataOffset = DATA_OFFSET;
+
     // Start sections reading
     for (int i = 0; i < header.shCount; ++i) {
         SectionHeader section = sections[i];
         fseek(source, section.address, SEEK_SET);
         switch (section.type) {
             case SHT_EXEC: {
-                for (int j = 0; j < section.size / 4; ++j) {
+                for (int j = 0; j < section.size * 0.25; ++j) {
                     uint32_t instr = read_word(source);
                     mem_write(&memory, programOffset, instr);
                     programOffset += 4;
@@ -99,19 +100,19 @@ int main(int argc, char const *argv[]) {
                 break;
             }
             case SHT_ALLOC: {
-                for (int j = 0; j < section.size / 4; ++j) {
-                    uint32_t buffer = read_word(source);
-                    mem_write(&memory, programOffset, buffer);
-                    dataOffset += 4;
+                for (int j = 0; j < section.size; ++j) {
+                    uint8_t buffer = read_byte(source);
+                    mem_write_byte(&memory, dataOffset++, buffer);
                 }
                 break;
             }
             case SHT_STRTAB: {
-                for (int j = 0; j < section.size; ++j) {
+                read_byte(source);
+                for (int j = 0; j < section.size - 2; ++j) {
                     uint8_t buffer = read_byte(source);
-                    mem_write_byte(&memory, programOffset, buffer);
-                    dataOffset++;
+                    mem_write_byte(&memory, dataOffset++, buffer);
                 }
+                read_byte(source);
                 break;
             }
             case SHT_NULL:

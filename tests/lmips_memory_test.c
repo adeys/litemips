@@ -52,12 +52,18 @@ void testLbInstruction(CuTest* test) {
     };
 
     initTestSimulator(&mips, program);
+
+    //Assign memory
+    Memory memory;
+    initMemory(&memory);
+    mips.memory = &memory;
     mem_write_byte(mips.memory, mips.regs[$sp], 12);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
     CuAssertIntEquals(test, 12, mips.regs[$t0]);
 
+    freeMemory(&memory);
     freeSimulator(&mips);
 }
 
@@ -72,12 +78,19 @@ void testLhuInstruction(CuTest* test) {
     };
 
     initTestSimulator(&mips, program);
+
+    //Assign memory
+    Memory memory;
+    initMemory(&memory);
+    mips.memory = &memory;
+
     mem_write_half(mips.memory, mips.regs[$sp], -1200);
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
     CuAssertIntEquals(test, (uint16_t)(-1200) , mips.regs[$t0]);
 
+    freeMemory(&memory);
     freeSimulator(&mips);
 }
 
@@ -92,12 +105,19 @@ void testSbInstruction(CuTest* test) {
     };
 
     initTestSimulator(&mips, program);
+
+    //Assign memory
+    Memory memory;
+    initMemory(&memory);
+    mips.memory = &memory;
+
     mips.regs[$t0] = 120;
 
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_SUCCESS, result);
     CuAssertIntEquals(test,  mips.regs[$t0], mem_read_byte(mips.memory, mips.regs[$sp]));
 
+    freeMemory(&memory);
     freeSimulator(&mips);
 }
 

@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "lmips.h"
 #include "lmips_opcodes.h"
@@ -22,10 +24,6 @@ void initTestSimulator(LMips* mips, uint8_t* program) {
     mips->regs[$sp] = STACK_OFFSET;
     mips->regs[$gp] = DATA_OFFSET;
     mips->program = program;
-
-    Memory memory;
-    initMemory(&memory);
-    mips->memory = &memory;
 }
 
 void initSimulator(LMips* mips, Memory* memory) {
@@ -38,7 +36,6 @@ void initSimulator(LMips* mips, Memory* memory) {
 }
 
 void freeSimulator(LMips* mips) {
-    freeMemory(mips->memory);
     resetSimulator(mips);
 }
 
@@ -135,6 +132,26 @@ ExecutionResult execInstruction(LMips* mips) {
                 }
                 case SPE_SYSCALL: {
                     switch (mips->regs[$v0]) {
+                        case SYS_PRINT_INT: {
+                            printf("%d", mips->regs[$a0]);
+                            break;
+                        }
+                        case SYS_PRINT_STRING: {
+                            const char* string = (const char*)&mips->memory->store[mips->regs[$a0]];
+                            printf("%s", string);
+                            break;
+                        }
+                        case SYS_READ_INT: {
+                            char buffer[12];
+                            fgets(buffer, 11, stdin);
+                            buffer[strlen(buffer)] = '\0';
+                            mips->regs[$v0] = strtoul(buffer, NULL, 0);
+                            break;
+                        }
+                        case SYS_READ_STRING: {
+                            fgets((char*)&mips->regs[$a0], mips->regs[$a1], stdin);
+                            break;
+                        }
                         case SYS_EXIT: {
                             mips->stop = true;
                             break;
