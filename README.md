@@ -9,11 +9,8 @@ Lite Mips Simulator is a MIPS inspired (subset implementation) VM/CPU implementa
 - 3 special registers
 
 ### General purpose registers
-They are named following two differents conventions: 
-- Either with their associated number (0 - 31)
-- Either with their special use cases
 
-| Register Number | Alternative Name | Description |
+| Register Number | Alternative/Assembly Name | Description |
 |  :-----------:  |  :------------:  | :---------: |
 |   0   | $zero | the value 0 |
 |   1   | $at  | (assembler temporary) reserved by the assembler |
@@ -93,6 +90,7 @@ Following instructions are supported
 |  subu |  100011  | f $d, $s, $t | $d = $s - $t |
 |  xor  |  100110  | f $d, $s, $t | $d = $s ^ $t |
 |  xori |  001110  | f $d, $s, i  | $d = $s ^ ZE(i) |
+|  lui  |  001111  |    f $t, i   | $t = i << 16 | 0 |
 
 - Comparison Instructions
 

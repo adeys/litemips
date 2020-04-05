@@ -263,6 +263,7 @@ class Parser {
           this.assembly.addInstruction(instr);
           break;
         }
+      case "lui":
       case "li":
         {
           Token dest = expect(TokenType.T_REGISTER,

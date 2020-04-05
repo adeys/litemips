@@ -310,19 +310,24 @@ ExecutionResult execInstruction(LMips* mips) {
         case OP_ANDI: {
             uint32_t immed = zero_extend(GET_IMMED(instr), 16);
 
-            mips->regs[GET_RT(instr)] = GET_RS(instr) & immed;
+            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] & immed;
             break;
         }
         case OP_ORI: {
             uint32_t immed = zero_extend(GET_IMMED(instr), 16);
 
-            mips->regs[GET_RT(instr)] = GET_RS(instr) | immed;
+            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] | immed;
             break;
         }
         case OP_XORI: {
             uint32_t immed = zero_extend(GET_IMMED(instr), 16);
 
-            mips->regs[GET_RT(instr)] = GET_RS(instr) ^ immed;
+            mips->regs[GET_RT(instr)] = mips->regs[GET_RS(instr)] ^ immed;
+            break;
+        }
+        case OP_LUI: {
+            uint32_t immed = (GET_IMMED(instr) << 16) | 0x00;
+            mips->regs[GET_RT(instr)] = immed;
             break;
         }
         case OP_LB: {

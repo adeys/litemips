@@ -66,6 +66,7 @@ List<String> instructions = [
   "subu",
   "xor",
   "xori",
+  "lui",
   "li",
   "slt",
   "sltu",

@@ -35,6 +35,7 @@ const Map<String, int> OpCodes = {
   "andi": 0x0C,
   "ori": 0x0D,
   "xori": 0x0E,
+  "lui": 0x0F,
   "lb": 0x20,
   "lh": 0x21,
   "lw": 0x23,

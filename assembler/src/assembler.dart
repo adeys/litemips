@@ -2,7 +2,6 @@ import 'dart:typed_data';
 
 import 'assembly.dart';
 import 'instruction.dart';
-import 'lexer.dart';
 import 'token.dart';
 
 List<String> registers = [
@@ -63,6 +62,8 @@ class Assembler {
   int sha = 0;
   int strt  = 0;
   List<int> relocations = [];
+  // CPU dependant
+  final int DATA_TOP = 0x07FFFF;
 
   Assembler(Assembly program) {
     this.assembly = program;
@@ -117,13 +118,18 @@ class Assembler {
         case "sltu":
         case "beq":
         case "bne": {
-          address += instr.rt.type == TokenType.T_SCALAR ? 1 : 0;
+          address += instr.rt.type == TokenType.T_SCALAR ? 4 : 0;
           break;
         }
         case "blt":
         case "rem":
         case "remu": {
-          address += instr.rt.type == TokenType.T_SCALAR ? 2 : 1;
+          address += instr.rt.type == TokenType.T_SCALAR ? 8 : 4;
+          break;
+        }
+        case "la":
+        case "li": {
+          address += 4;
           break;
         }
         default:
@@ -230,7 +236,7 @@ class Assembler {
             if (instr.rt.type == TokenType.T_SCALAR) {
               // addi $at, $zero, immed
               tgt = getRegister("\$at");
-              this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
+              this.emitImmediate("ori", 0x00, tgt, instr.rt.value);
             }
             this.emitSpecial(instr.name, instr.rs.value, tgt, instr.rd.value, 0x00);
             break;
@@ -264,7 +270,7 @@ class Assembler {
           if (instr.rt.type == TokenType.T_SCALAR) {
             // addi $at, $zero, immed
             tgt = getRegister("\$at");
-            this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
+            this.emitImmediate("ori", 0x00, tgt, instr.rt.value);
           }
           this.emitSpecial(instr.name.endsWith("u") ? "divu" : "div", instr.rs.value, tgt, 0x00, 0x00);
           this.emitSpecial("mfhi", 0x00, 0x00, instr.rd.value, 0x00);
@@ -282,8 +288,13 @@ class Assembler {
           this.emitSpecial(instr.name, instr.rt.value, instr.rs.value, instr.rd.value, 0x00);
           break;
         }
+        case "lui": {
+          this.emitImmediate("lui", 0x00, instr.rt.value, instr.immed.value);
+          break;
+        }
         case "li": {
-          this.emitImmediate("addiu", 0x00, instr.rt.value, instr.immed.value);
+          this.emitImmediate("lui", 0x00, getRegister("\$at"), (instr.immed.value as int) >> 16);
+          this.emitImmediate("ori", getRegister("\$at"), instr.rt.value, (instr.immed.value as int));
           break;
         }
         case "b":
@@ -320,9 +331,9 @@ class Assembler {
 
           var tgt = instr.rt.value;
           if (instr.rt.type == TokenType.T_SCALAR) {
-            // addiu $at, $zero, immed
+            // addi $at, $zero, immed
             tgt = getRegister("\$at");
-            this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
+            this.emitImmediate("addi", 0x00, tgt, instr.rt.value);
           }
 
           this.emitImmediate(instr.name, instr.rs.value, tgt, address);
@@ -334,9 +345,9 @@ class Assembler {
           // slt $at, rs, rt
           var tgt = instr.rt.value;
           if (instr.rt.type == TokenType.T_SCALAR) {
-            // addiu $at, $zero, immed
+            // ori $at, $zero, immed
             tgt = getRegister("\$at");
-            this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
+            this.emitImmediate("ori", 0x00, tgt, instr.rt.value);
           }
 
           this.emitSpecial("slt", instr.rs.value, tgt, getRegister("\$at"), 0x00);
@@ -372,8 +383,9 @@ class Assembler {
           }
 
           address = this.assembly.labels[label.value].address;
-          // addiu $rd, $gp, address
-          this.emitImmediate("addiu", getRegister("\$gp"), instr.rt.value, address);
+          // ori $rd, $gp, address
+          this.emitImmediate("lui", 0x00, getRegister("\$at"), DATA_TOP >> 16);
+          this.emitImmediate("ori", getRegister("\$at"), instr.rt.value, DATA_TOP + address);
           break;
         }
         case "lb":

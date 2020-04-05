@@ -16,6 +16,7 @@ enum OpCodes {
     OP_ANDI,
     OP_ORI,
     OP_XORI,
+    OP_LUI,
     OP_LB = 0x20,
     OP_LH,
     OP_LW = 0x23,
