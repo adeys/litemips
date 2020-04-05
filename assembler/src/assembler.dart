@@ -2,6 +2,7 @@ import 'dart:typed_data';
 
 import 'assembly.dart';
 import 'instruction.dart';
+import 'lexer.dart';
 import 'token.dart';
 
 List<String> registers = [
@@ -56,10 +57,12 @@ class Assembler {
   Assembly assembly;
   Uint8List buffer;
   int offset = 0;
+  int address = 0;
   List<SectionHeader> headers = [];
   int entry = 0;
   int sha = 0;
   int strt  = 0;
+  List<int> relocations = [];
 
   Assembler(Assembly program) {
     this.assembly = program;
@@ -69,6 +72,7 @@ class Assembler {
   }
 
   Uint8List assemble() {
+    this.createRelocationTable();
     this.resolveLabels();
 
     this.entry = this.offset;
@@ -93,10 +97,45 @@ class Assembler {
     headers.add(header);
   }
 
+  void createRelocationTable() {
+    int address = 0;
+    for (var i = 0; i < this.assembly.instructions.length; ++i) {
+      Instruction instr = this.assembly.instructions[i];
+      this.relocations.add(address);
+      address += 4;
+
+      switch(instr.name) {
+        case "add":
+        case "addu":
+        case "and":
+        case "nor":
+        case "or":
+        case "sub":
+        case "subu":
+        case "xor":
+        case "slt":
+        case "sltu":
+        case "beq":
+        case "bne": {
+          address += instr.rt.type == TokenType.T_SCALAR ? 1 : 0;
+          break;
+        }
+        case "blt":
+        case "rem":
+        case "remu": {
+          address += instr.rt.type == TokenType.T_SCALAR ? 2 : 1;
+          break;
+        }
+        default:
+          break;
+      }
+    }
+  }
+
   void resolveLabels() {
     for (Label label in assembly.labels.values) {
       if (label.segment == Segment.SGT_TEXT) {
-        label.address *= 4;
+        label.address = this.relocations[label.address];
       }
     }
   }
@@ -267,9 +306,6 @@ class Assembler {
         }
         case "beq":
         case "bne": {
-          // Adjust bindings
-          Token tmp = instr.rs; instr.rs = instr.rt; instr.rt = tmp;
-
           Token label = instr.immed;
           int address;
           if (label.type == TokenType.T_IDENTIFIER) {
@@ -277,7 +313,7 @@ class Assembler {
               throw new AssemblerError(label, "Undefined label '${label.value}'.");
             }
 
-            address = this.assembly.labels[label.value].address >> 2;
+            address = this.resolveLabelAddr(this.assembly.labels[label.value].address) >> 2;
           } else {
             address = ((label.value as int) >> 2) & 0x03FFFFFF;
           }
@@ -289,7 +325,7 @@ class Assembler {
             this.emitImmediate("addiu", 0x00, tgt, instr.rt.value);
           }
 
-          this.emitImmediate(instr.name, instr.rs.value, tgt, address - this.offset - 1);
+          this.emitImmediate(instr.name, instr.rs.value, tgt, address);
           break;
         }
         case "blt": {
@@ -313,11 +349,11 @@ class Assembler {
               throw new AssemblerError(label, "Undefined label '${label.value}'.");
             }
 
-            address = this.assembly.labels[label.value].address >> 2;
+            address = this.resolveLabelAddr(this.assembly.labels[label.value].address) >> 2;
           } else {
             address = ((label.value as int) >> 2) & 0x03FFFFFF;
           }
-          this.emitImmediate("bne", getRegister("\$at"), 0x00, address - this.offset - 1);
+          this.emitImmediate("bne", getRegister("\$at"), 0x00, address);
           break;
         }
         case "jr": {
@@ -378,6 +414,7 @@ class Assembler {
   void emitJInstruction(int code, int immediate) {
     int instr = (code << 26) | immediate;
     this.emitWord(instr);
+    this.address += 4;
   }
 
   void emitSpecial(String code, int rs, int rt, int rd, int shmt) {
@@ -388,11 +425,13 @@ class Assembler {
         (shmt << 6) |
         (OpCodes[code] & 0x3F);
     this.emitWord(instr);
+    this.address += 4;
   }
 
   void emitImmediate(String code, int rs, int rt, int immed) {
     int instr = (OpCodes[code] << 26) | (rs << 21) | (rt << 16) | (immed & 0xFFFF);
     this.emitWord(instr);
+    this.address += 4;
   }
 
   void emitByte(int byte) {
@@ -414,6 +453,10 @@ class Assembler {
     emitByte(word >> 0x10);
     emitByte(word >> 0x08);
     emitByte(word);
+  }
+
+  int resolveLabelAddr(int label) {
+    return label - this.address;
   }
 }
 

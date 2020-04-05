@@ -201,6 +201,8 @@ class Parser {
           this.assembly.addInstruction(instr);
           break;
         }
+      case "beq":
+      case "bne":
       case "bge":
       case "bgeu":
       case "bgt":
@@ -242,8 +244,6 @@ class Parser {
       case "xori":
       case "slti":
       case "sltiu":
-      case "beq":
-      case "bne":
         {
           Token dest = expect(TokenType.T_REGISTER,
               "Expected register as '${token.value}' first operand.");

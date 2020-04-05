@@ -255,29 +255,29 @@ ExecutionResult execInstruction(LMips* mips) {
         }
         case OP_BEQ: {
             if (mips->regs[GET_RS(instr)] == mips->regs[GET_RT(instr)]) {
-                uint32_t offset = GET_IMMED(instr) << 2;
-                mips->ip += offset;
+                int32_t offset = GET_IMMED(instr) << 2;
+                mips->ip += (offset - 4);
             }
             break;
         }
         case OP_BNE: {
             if (mips->regs[GET_RS(instr)] != mips->regs[GET_RT(instr)]) {
                 uint32_t offset = GET_IMMED(instr) << 2;
-                mips->ip += offset;
+                mips->ip += (offset - 4);
             }
             break;
         }
         case OP_BLEZ: {
             if ((int32_t)(mips->regs[GET_RS(instr)]) <= 0) {
                 uint32_t offset = GET_IMMED(instr) << 2;
-                mips->ip += offset;
+                mips->ip += (offset - 4);
             }
             break;
         }
         case OP_BGTZ: {
             if ((int32_t)(mips->regs[GET_RS(instr)]) >= 0) {
                 uint32_t offset = GET_IMMED(instr) << 2;
-                mips->ip += offset;
+                mips->ip += (offset - 4);
             }
             break;
         }
