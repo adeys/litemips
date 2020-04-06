@@ -397,6 +397,7 @@ class Parser {
       List<int> expand = new List(size); expand.fillRange(0, size, 0);
       this.assembly.directives.last.operands.addAll(expand);
       this.assembly.dataSize += size;
+      this.assembly.labels.values.last.address += size;
     }
 
     this.assembly.addDirective(directive);

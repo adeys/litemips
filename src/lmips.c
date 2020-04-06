@@ -147,6 +147,7 @@ ExecutionResult execInstruction(LMips* mips) {
                         case SYS_PRINT_STRING: {
                             const char* string = (const char*)&mips->memory->store[mips->regs[$a0]];
                             printf("%s", string);
+                            fflush(stdout);
                             break;
                         }
                         case SYS_READ_INT: {
@@ -157,7 +158,9 @@ ExecutionResult execInstruction(LMips* mips) {
                             break;
                         }
                         case SYS_READ_STRING: {
-                            fgets((char*)&mips->regs[$a0], mips->regs[$a1], stdin);
+                            uint32_t address = mips->regs[$a0];
+                            fgets((char*)&mips->memory->store[address], mips->regs[$a1], stdin);
+                            mips->memory->store[address + strlen((char*)&mips->memory->store[address]) - 1] = '\0';
                             break;
                         }
                         case SYS_EXIT: {

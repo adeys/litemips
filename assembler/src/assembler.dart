@@ -183,6 +183,13 @@ class Assembler {
 
     for (Directive directive in this.assembly.directives) {
       switch(directive.name) {
+        case ".space": {
+          this.emitBytes(List.filled(directive.operands[0], 0));
+          for (int i = directive.operands.length - 1; i > 0 ; i--) {
+            this.emitByte(0);
+          }
+          break;
+        }
         case ".byte":
         case ".half":
         case ".word": {
