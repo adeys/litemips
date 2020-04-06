@@ -391,6 +391,14 @@ class Parser {
     directive.operands = operands;
 
     this.assembly.dataSize += (operands.length * size);
+    int mod = this.assembly.dataSize % size;
+    if (mod != 0) {
+      size -=  mod;
+      List<int> expand = new List(size); expand.fillRange(0, size, 0);
+      this.assembly.directives.last.operands.addAll(expand);
+      this.assembly.dataSize += size;
+    }
+
     this.assembly.addDirective(directive);
   }
 
