@@ -9,6 +9,7 @@ void resetSimulator(LMips* mips) {
     mips->ip = 0;
     mips->hi = 0;
     mips->lo = 0;
+    mips->heap = 0;
     mips->stop = false;
     mips->program = NULL;
     mips->memory = NULL;
@@ -22,14 +23,16 @@ void resetSimulator(LMips* mips) {
 void initTestSimulator(LMips* mips, uint8_t* program) {
     resetSimulator(mips);
     mips->regs[$sp] = STACK_ADDRESS;
-    mips->regs[$gp] = HEAP_ADDRESS;
+    mips->regs[$gp] = (DATA_ADDRESS + HEAP_ADDRESS) / 2;
+    mips->heap = HEAP_ADDRESS;
     mips->program = program;
 }
 
 void initSimulator(LMips* mips, Memory* memory) {
     resetSimulator(mips);
     mips->regs[$sp] = STACK_ADDRESS;
-    mips->regs[$gp] = HEAP_ADDRESS;
+    mips->regs[$gp] = (DATA_ADDRESS + HEAP_ADDRESS) / 2;
+    mips->heap = HEAP_ADDRESS;
     mips->program = &memory->store[PROGRAM_ADDRESS];
 
     mips->memory = memory;
@@ -164,8 +167,8 @@ ExecutionResult execInstruction(LMips* mips) {
                             break;
                         }
                         case SYS_SBRK: {
-                            mips->regs[$gp] += mips->regs[$a0];
-                            mips->regs[$v0] = mips->regs[$gp];
+                            mips->regs[$v0] = mips->heap;
+                            mips->heap += mips->regs[$a0];
                             break;
                         }
                         case SYS_EXIT: {

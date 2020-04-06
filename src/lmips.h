@@ -9,7 +9,8 @@ struct lm {
     uint8_t* program;
     uint32_t regs[REG_COUNT];
     uint32_t ip;
-    int32_t hi, lo;
+    uint32_t hi, lo;
+    uint32_t heap;
     Memory* memory;
     bool stop;
 };
