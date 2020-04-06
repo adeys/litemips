@@ -81,7 +81,7 @@ class Assembler {
       throw new AssemblerError(null, "Entry point symbol ${this.assembly.entryPoint} not found in program");
     }
 
-    this.entry += this.assembly.labels["main"].address;
+    this.entry += this.assembly.labels[this.assembly.entryPoint].address;
 
     this.emitInstructions();
     this.emitInstructionHeader();
