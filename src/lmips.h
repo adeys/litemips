@@ -29,6 +29,6 @@ void freeSimulator(LMips* mips);
 ExecutionResult runSimulator(LMips* mips);
 ExecutionResult execInstruction(LMips* mips);
 
-void handleException(ExecutionResult);
+void handleException(ExecutionResult, LMips*);
 
 #endif // LMIPS_MIPS
