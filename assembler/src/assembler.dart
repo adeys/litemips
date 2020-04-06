@@ -349,8 +349,8 @@ class Assembler {
         }
         case "beq":
         case "bne": {
-          int address = this._getAddress(instr.immed);
           int rt = this._getRt(instr.rt);
+          int address = this._getAddress(instr.immed);
 
           this.emitImmediate(instr.name, instr.rs.value, rt, address);
           break;
@@ -371,18 +371,18 @@ class Assembler {
         case "blt":
         case "bge": {
           int rt = this._getRt(instr.rt);
-          int address = this._getAddress(instr.immed);
 
           this.emitSpecial("slt", instr.rs.value, rt, getRegister("\$at"), 0x00);
+          int address = this._getAddress(instr.immed);
           this.emitImmediate(instr.name == "blt" ? "bne" : "beq", getRegister("\$at"), 0x00, address);
           break;
         }
         case "bgt":
         case "ble": {
           int rt = this._getRt(instr.rt);
-          int address = this._getAddress(instr.immed);
 
           this.emitSpecial("sub", instr.rs.value, rt, getRegister("\$at"), 0x00);
+          int address = this._getAddress(instr.immed);
           this.emitImmediate(instr.name + "z", getRegister("\$at"), 0x00, address);
           break;
         }

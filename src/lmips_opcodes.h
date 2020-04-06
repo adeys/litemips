@@ -63,7 +63,7 @@ enum SysCallCodes {
     SYS_PRINT_STRING = 0x04,
     SYS_READ_INT,
     SYS_READ_STRING,
-    SYS_SBRK,
+    SYS_SBRK = 0x09,
     SYS_EXIT
 };
 

@@ -93,7 +93,7 @@ ExecutionResult execInstruction(LMips* mips) {
     if ((offset % align != 0) || address >= MEMORY_SIZE || address < DATA_ADDRESS) return EXEC_ERR_MEMORY_ADDR
 #define COMP_OP(op) \
     if ((int32_t)(mips->regs[GET_RS(instr)]) op 0) { \
-        uint32_t offset = GET_IMMED(instr) << 2; \
+        int32_t offset = sign_extend(GET_IMMED(instr) << 2, 14); \
         mips->ip += (offset - 4); \
     }
 
@@ -288,14 +288,14 @@ ExecutionResult execInstruction(LMips* mips) {
         }
         case OP_BEQ: {
             if (mips->regs[GET_RS(instr)] == mips->regs[GET_RT(instr)]) {
-                int32_t offset = GET_IMMED(instr) << 2;
+                int32_t offset = sign_extend(GET_IMMED(instr) << 2, 14);
                 mips->ip += (offset - 4);
             }
             break;
         }
         case OP_BNE: {
             if (mips->regs[GET_RS(instr)] != mips->regs[GET_RT(instr)]) {
-                uint32_t offset = GET_IMMED(instr) << 2;
+                int32_t offset = sign_extend(GET_IMMED(instr) << 2, 14);
                 mips->ip += (offset - 4);
             }
             break;
