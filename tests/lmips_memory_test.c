@@ -15,10 +15,16 @@ void testLoadInvalidMemoryAddressInstruction(CuTest* test) {
 
     initTestSimulator(&mips, program);
 
+    //Assign memory
+    Memory memory;
+    initMemory(&memory);
+    mips.memory = &memory;
+
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_ERR_MEMORY_ADDR, result);
     CuAssertIntEquals(test, 4, mips.ip);
 
+    freeMemory(&memory);
     freeSimulator(&mips);
 }
 
@@ -34,10 +40,16 @@ void testInvalidMemoryOffsetInstruction(CuTest* test) {
 
     initTestSimulator(&mips, program);
 
+    //Assign memory
+    Memory memory;
+    initMemory(&memory);
+    mips.memory = &memory;
+
     ExecutionResult result = runSimulator(&mips);
     CuAssertIntEquals(test, EXEC_ERR_MEMORY_ADDR, result);
     CuAssertIntEquals(test, 4, mips.ip);
 
+    freeMemory(&memory);
     freeSimulator(&mips);
 }
 

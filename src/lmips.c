@@ -430,7 +430,7 @@ ExecutionResult execInstruction(LMips* mips) {
 
 void handleException(ExecutionResult exc, LMips* mips) {
     if (exc == EXEC_ERR_INT_OVERFLOW) {
-        fprintf(stderr, "Integer overflow exception.\n");
+        fprintf(stderr, "[%#010x] Integer overflow exception.\n", PROGRAM_OFFSET + mips->ip);
     } else if (exc == EXEC_ERR_MEMORY_ADDR) {
         fprintf(stderr, "[%#010x] Invalid memory address.\n", PROGRAM_OFFSET + mips->ip);
     }

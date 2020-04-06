@@ -6,7 +6,7 @@
 #define MEMORY_SIZE ((UINT16_MAX + 1) * 64) // 4MB
 #define PROGRAM_OFFSET 0x02000
 #define DATA_OFFSET 0x07FFFF
-#define STACK_OFFSET 0x3FFFF0
+#define STACK_OFFSET 0x3FFFFF
 
 typedef struct {
     uint8_t* store;

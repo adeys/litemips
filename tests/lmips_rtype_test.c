@@ -26,6 +26,7 @@ void testRunNullProgram(CuTest* test) {
 
 void testRunInvalidProgram(CuTest* test) {
     LMips mips;
+    // This program lead to undefined behaviour
     uint8_t program[] = {
         1, 0, 0, 0
     };
