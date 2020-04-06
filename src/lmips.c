@@ -92,7 +92,7 @@ ExecutionResult execInstruction(LMips* mips) {
 #define CHECK_MEM_ADDR(offset, address) \
     if ((offset % 4 != 0) || address >= MEMORY_SIZE) return EXEC_ERR_MEMORY_ADDR
 #define COMP_OP(op) \
-    if ((int32_t)(mips->regs[GET_RS(instr)]) > 0) { \
+    if ((int32_t)(mips->regs[GET_RS(instr)]) op 0) { \
         uint32_t offset = GET_IMMED(instr) << 2; \
         mips->ip += (offset - 4); \
     }
