@@ -123,7 +123,8 @@ List<String> directives = [
   ".space",
   ".byte",
   ".half",
-  ".word"
+  ".word",
+  ".entry"
 ];
 
 class Lexer {

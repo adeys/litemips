@@ -77,9 +77,11 @@ class Assembler {
     this.resolveLabels();
 
     this.entry = this.offset;
-    if (this.assembly.labels.containsKey("main")) {
-      this.entry += this.assembly.labels["main"].address;
+    if (!this.assembly.labels.containsKey(this.assembly.entryPoint)) {
+      throw new AssemblerError(null, "Entry point symbol ${this.assembly.entryPoint} not found in program");
     }
+
+    this.entry += this.assembly.labels["main"].address;
 
     this.emitInstructions();
     this.emitInstructionHeader();
@@ -290,7 +292,6 @@ class Assembler {
         }
         case "rem":
         case "remu": {
-          // remu rd, rs, rt -> divu rs, rt ; mfhi rd
           int rt = this._getRt(instr.rt);
           this.emitSpecial(instr.name.endsWith("u") ? "divu" : "div", instr.rs.value, rt, 0x00, 0x00);
           this.emitSpecial("mfhi", 0x00, 0x00, instr.rd.value, 0x00);
@@ -414,7 +415,6 @@ class Assembler {
           }
 
           address = DATA_TOP + this.assembly.labels[label.value].address;
-          // ori $rd, $gp, address
           this.emitImmediate("lui", 0x00, getRegister("\$at"), address >> 16);
           this.emitImmediate("ori", getRegister("\$at"), instr.rt.value, address);
           break;
@@ -519,7 +519,6 @@ class Assembler {
 
   int _getRt(Token token) {
     if (token.type == TokenType.T_SCALAR) {
-      // ori $at, $zero, immed
       int rt = getRegister("\$at");
       this.emitImmediate("ori", 0x00, rt, token.value);
       return rt;

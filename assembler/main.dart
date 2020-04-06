@@ -33,7 +33,8 @@ void main(List<String> argv) {
   try {
     program = assembler.assemble();
   } on AssemblerError catch(e) {
-    stderr.writeln("[line ${e.token.line}] Assembler Error : ${e.message}.");
+    String header = (e.token != null ? "[line ${e.token.line}] " : "") + "Assembler Error";
+    stderr.writeln("$header : ${e.message}.");
     exit(1);
   }
 

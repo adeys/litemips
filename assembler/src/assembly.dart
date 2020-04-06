@@ -22,6 +22,7 @@ class Assembly {
   List<Directive> directives = [];
   Map<String, Label> labels = {};
   int dataSize = 0;
+  String entryPoint = "main";
 
   void addInstruction(Instruction instruction) {
     instructions.add(instruction);

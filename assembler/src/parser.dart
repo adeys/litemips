@@ -68,6 +68,11 @@ class Parser {
       return;
     }
 
+    if (this.current.value == ".entry") {
+      this.assembly.entryPoint = this.expect(TokenType.T_IDENTIFIER, "Expected label as .entry directive's operand.").value;
+      return;
+    }
+
     if (segment != Segment.SGT_DATA) {
       reportError(
           "Cannot put directive ${this.current.lexeme} outside of a .data segment.");
