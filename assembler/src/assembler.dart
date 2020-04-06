@@ -121,10 +121,24 @@ class Assembler {
           address += instr.rt.type == TokenType.T_SCALAR ? 4 : 0;
           break;
         }
+        case "blez":
+        case "bltz":
+        case "bgtz":
+        case "bgez":
         case "blt":
+        case "bge":
+        case "bgt":
+        case "ble":
+        case "sge":
+        case "sgt":
         case "rem":
         case "remu": {
           address += instr.rt.type == TokenType.T_SCALAR ? 8 : 4;
+          break;
+        }
+        case "mul":
+        case "abs": {
+          address += 8;
           break;
         }
         case "la":
@@ -222,6 +236,12 @@ class Assembler {
   void emitInstructions() {
     for (Instruction instr in assembly.instructions) {
       switch (instr.name) {
+        case "abs": {
+          this.emitSpecial("addu", 0x00, instr.rt.value, instr.rs.value, 0x00);
+          this.emitImmediate("rsi", instr.rt.value, OpCodes["bgez"], 0x08 >> 2);
+          this.emitSpecial("sub", 0x00, instr.rt.value, instr.rs.value, 0x00);
+          break;
+        }
         case "add":
         case "addu":
         case "and":
@@ -232,10 +252,16 @@ class Assembler {
         case "xor":
         case "slt":
         case "sltu": {
-            int tgt = this._getRt(instr.rt);
-            this.emitSpecial(instr.name, instr.rs.value, tgt, instr.rd.value, 0x00);
-            break;
-          }
+          int rt = this._getRt(instr.rt);
+          this.emitSpecial(instr.name, instr.rs.value, rt, instr.rd.value, 0x00);
+          break;
+        }
+        case "mul": {
+          int rt = this._getRt(instr.rt);
+          this.emitSpecial("mult", instr.rs.value, rt, 0x00, 0x00);
+          this.emitSpecial("mflo", 0x00, 0x00, instr.rd.value, 0x00);
+          break;
+        }
         case "addi":
         case "addiu":
         case "andi":
@@ -258,11 +284,15 @@ class Assembler {
           this.emitSpecial(instr.name.endsWith("u") ? "subu" : "sub", getRegister("\$zero"), instr.rt.value, instr.rs.value, 0x00);
           break;
         }
+        case "not": {
+          this.emitSpecial("nor", 0x00, instr.rs.value, instr.rt.value, 0x00);
+          break;
+        }
         case "rem":
         case "remu": {
           // remu rd, rs, rt -> divu rs, rt ; mfhi rd
-          var tgt = this._getRt(instr.rt);
-          this.emitSpecial(instr.name.endsWith("u") ? "divu" : "div", instr.rs.value, tgt, 0x00, 0x00);
+          int rt = this._getRt(instr.rt);
+          this.emitSpecial(instr.name.endsWith("u") ? "divu" : "div", instr.rs.value, rt, 0x00, 0x00);
           this.emitSpecial("mfhi", 0x00, 0x00, instr.rd.value, 0x00);
           break;
         }
@@ -295,31 +325,77 @@ class Assembler {
           this.emitJInstruction(OpCodes[instr.name == "b" ? "j" : instr.name], address);
           break;
         }
+        case "sge": {
+          int rt = this._getRt(instr.rt);
+
+          this.emitSpecial("slt", instr.rs.value, rt, getRegister("\$at"), 0x00);
+          this.emitSpecial("xor", 0x00, getRegister("\$at"), instr.rd.value, 0x00);
+          break;
+        }
+        case "sgt": {
+          int rt = this._getRt(instr.rt);
+
+          this.emitSpecial("sub", instr.rs.value, rt, getRegister("\$at"), 0x00);
+          this.emitSpecial("slt", 0x00, getRegister("\$at"), instr.rd.value, 0x00);
+          break;
+        }
         case "beq":
         case "bne": {
           int address = this._getAddress(instr.immed);
+          int rt = this._getRt(instr.rt);
 
-          int tgt = this._getRt(instr.rt);
-
-          this.emitImmediate(instr.name, instr.rs.value, tgt, address);
+          this.emitImmediate(instr.name, instr.rs.value, rt, address);
           break;
         }
-        case "blt": {
-          // blt rs, rt, label -> slt $at, rs, rt ; bne $at, $zero, label;
+        case "beqz":
+        case "bnez": {
+          int address;
+          Token label = instr.immed;
+          if(!this.assembly.labels.containsKey(label.value)) {
+            throw new AssemblerError(label, "Undefined label '${label.value}'.");
+          }
 
-          // slt $at, rs, rt
-          int tgt = this._getRt(instr.rt);
+          address = this.resolveLabelAddr(this.assembly.labels[label.value].address) >> 2;
 
-          this.emitSpecial("slt", instr.rs.value, tgt, getRegister("\$at"), 0x00);
-
-          // bne $at, $zero, label
+          this.emitImmediate(instr.name.substring(0, 2), 0x00, instr.rt.value, address);
+          break;
+        }
+        case "blt":
+        case "bge": {
+          int rt = this._getRt(instr.rt);
           int address = this._getAddress(instr.immed);
-          this.emitImmediate("bne", getRegister("\$at"), 0x00, address);
+
+          this.emitSpecial("slt", instr.rs.value, rt, getRegister("\$at"), 0x00);
+          this.emitImmediate(instr.name == "blt" ? "bne" : "beq", getRegister("\$at"), 0x00, address);
+          break;
+        }
+        case "bgt":
+        case "ble": {
+          int rt = this._getRt(instr.rt);
+          int address = this._getAddress(instr.immed);
+
+          this.emitSpecial("sub", instr.rs.value, rt, getRegister("\$at"), 0x00);
+          this.emitImmediate(instr.name + "z", getRegister("\$at"), 0x00, address);
+          break;
+        }
+        case "blez":
+        case "bgtz": {
+          int address = this._getAddress(instr.immed);
+
+          this.emitImmediate(instr.name, instr.rt.value, 0x00, address);
           break;
         }
         case "bgez":
         case "bltz": {
-          this.emitImmediate("rsi", instr.rt.value, OpCodes[instr.name], instr.immed.value);
+          int address;
+          Token label = instr.immed;
+          if(!this.assembly.labels.containsKey(label.value)) {
+            throw new AssemblerError(label, "Undefined label '${label.value}'.");
+          }
+
+          address = this.resolveLabelAddr(this.assembly.labels[label.value].address) >> 2;
+
+          this.emitImmediate("rsi", instr.rt.value, OpCodes[instr.name], address);
           break;
         }
         case "jr": {
