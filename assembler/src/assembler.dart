@@ -138,6 +138,17 @@ class Assembler {
           address += instr.rt.type == TokenType.T_SCALAR ? 8 : 4;
           break;
         }
+        case "lb":
+        case "lbu":
+        case "lh":
+        case "lhu":
+        case "lw":
+        case "sb":
+        case "sh":
+        case "sw": {
+          address += instr.rs == null ? 8 : 0;
+          break;
+        }
         case "mul":
         case "abs": {
           address += 8;
@@ -434,7 +445,21 @@ class Assembler {
         case "sb":
         case "sh":
         case "sw": {
-          this.emitImmediate(instr.name, instr.rs.value, instr.rt.value, instr.immed.value);
+          if (instr.rs == null) { // Then a label has been given as operand
+            Token label = instr.immed;
+            int address;
+            if(!this.assembly.labels.containsKey(label.value)) {
+              throw new AssemblerError(label, "Undefined label '${label.value}'.");
+            }
+
+            address = DATA_TOP + this.assembly.labels[label.value].address;
+
+            this.emitImmediate("lui", 0x00, getRegister("\$at"), address >> 16);
+            this.emitImmediate("ori", getRegister("\$at"), getRegister("\$at"), address);
+            this.emitImmediate(instr.name, getRegister("\$at"), instr.rt.value, 0);
+          } else {
+            this.emitImmediate(instr.name, instr.rs.value, instr.rt.value, instr.immed.value);
+          }
           break;
         }
         case "move": {

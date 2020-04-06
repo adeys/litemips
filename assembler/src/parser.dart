@@ -314,21 +314,27 @@ class Parser {
           Token tgt = expect(TokenType.T_REGISTER,
               "Expected register as '${token.value}' first operand.");
           expect(TokenType.T_COMMA, "Expected ',' between operands.");
-          Token offset = new Token(TokenType.T_SCALAR, 0, 0);
-          if (matches(TokenType.T_SCALAR)) {
-            offset = this.current;
-          }
 
-          expect(TokenType.T_LPAREN, "Expected '(' after offset value.");
-          Token src = expect(TokenType.T_REGISTER,
-              "Expected register as '${token.value}' second operand.");
-          expect(TokenType.T_RPAREN, "Expected ')' after register value.");
-
-          Instruction instr =
-              new Instruction(token.value, 3, InstructionType.I_TYPE);
-          instr.rs = src;
+          Instruction instr = new Instruction(token.value, 3, InstructionType.I_TYPE);
           instr.rt = tgt;
-          instr.immed = offset;
+
+          if (matches(TokenType.T_IDENTIFIER)) {
+            instr.rs = null;
+            instr.immed = this.current;
+          } else {
+            Token offset = new Token(TokenType.T_SCALAR, 0, 0);
+            if (matches(TokenType.T_SCALAR)) {
+              offset = this.current;
+            }
+
+            expect(TokenType.T_LPAREN, "Expected '(' after offset value.");
+            Token src = expect(TokenType.T_REGISTER,
+                "Expected register as '${token.value}' second operand.");
+            expect(TokenType.T_RPAREN, "Expected ')' after register value.");
+
+            instr.rs = src;
+            instr.immed = offset;
+          }
 
           this.assembly.addInstruction(instr);
           break;
