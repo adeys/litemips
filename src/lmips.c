@@ -163,6 +163,11 @@ ExecutionResult execInstruction(LMips* mips) {
                             mips->memory->store[address + strlen((char*)&mips->memory->store[address]) - 1] = '\0';
                             break;
                         }
+                        case SYS_SBRK: {
+                            mips->regs[$gp] += mips->regs[$a0];
+                            mips->regs[$v0] = mips->regs[$gp];
+                            break;
+                        }
                         case SYS_EXIT: {
                             mips->stop = true;
                             break;

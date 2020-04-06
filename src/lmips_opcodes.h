@@ -62,8 +62,9 @@ enum SysCallCodes {
     SYS_PRINT_INT = 0x01,
     SYS_PRINT_STRING = 0x04,
     SYS_READ_INT,
-    SYS_READ_STRING = 0x08,
-    SYS_EXIT = 0x0A
+    SYS_READ_STRING,
+    SYS_SBRK,
+    SYS_EXIT
 };
 
 enum SriCodes {

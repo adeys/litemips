@@ -17,6 +17,7 @@ void main(List<String> argv) {
     exit(1);
   }
 
+  print("Assembler : Assembling ${file.absolute.path}");
   Lexer lexer = new Lexer(file.readAsStringSync());
   lexer.tokenize();
 
@@ -44,5 +45,5 @@ void main(List<String> argv) {
   out.createSync();
   out.writeAsBytesSync(program);
 
-  print("Compilation successful.");
+  print("Assembler : Assembling completed successfully.");
 }

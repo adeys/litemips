@@ -55,6 +55,7 @@ List<String> instructions = [
   "nor",
   "not",
   "or",
+  "ori",
   "rem",
   "remu",
   "sll",
