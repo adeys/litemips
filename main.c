@@ -83,8 +83,8 @@ int main(int argc, char const *argv[]) {
 
     Memory memory = {};
     initMemory(&memory);
-    uint32_t programOffset = PROGRAM_OFFSET;
-    uint32_t dataOffset = DATA_OFFSET;
+    uint32_t programOffset = PROGRAM_ADDRESS;
+    uint32_t dataOffset = DATA_ADDRESS;
 
     // Start sections reading
     for (int i = 0; i < header.shCount; ++i) {

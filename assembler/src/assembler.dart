@@ -63,7 +63,7 @@ class Assembler {
   int strt  = 0;
   List<int> relocations = [];
   // CPU dependant
-  final int DATA_TOP = 0x07FFFF;
+  final int DATA_TOP = 0x080000;
 
   Assembler(Assembly program) {
     this.assembly = program;

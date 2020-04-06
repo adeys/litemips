@@ -8,7 +8,7 @@ void testSimulatorInit(CuTest* test) {
     initTestSimulator(&mips, NULL);
 
     for (int i = 0; i < REG_COUNT; ++i) {
-        CuAssertIntEquals(test,  i == $sp ? STACK_OFFSET : (i == $gp ? DATA_OFFSET : 0) , mips.regs[i]);
+        CuAssertIntEquals(test,  i == $sp ? STACK_ADDRESS : (i == $gp ? HEAP_ADDRESS : 0) , mips.regs[i]);
     }
 
     freeSimulator(&mips);

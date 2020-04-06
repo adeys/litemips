@@ -4,9 +4,10 @@
 #include "common.h"
 
 #define MEMORY_SIZE ((UINT16_MAX + 1) * 64) // 4MB
-#define PROGRAM_OFFSET 0x02000
-#define DATA_OFFSET 0x07FFFF
-#define STACK_OFFSET 0x3FFFFF
+#define PROGRAM_ADDRESS 0x002000
+#define DATA_ADDRESS 0x080000
+#define HEAP_ADDRESS 0x101000
+#define STACK_ADDRESS 0x3FFFFF
 
 typedef struct {
     uint8_t* store;

@@ -21,16 +21,16 @@ void resetSimulator(LMips* mips) {
 
 void initTestSimulator(LMips* mips, uint8_t* program) {
     resetSimulator(mips);
-    mips->regs[$sp] = STACK_OFFSET;
-    mips->regs[$gp] = DATA_OFFSET;
+    mips->regs[$sp] = STACK_ADDRESS;
+    mips->regs[$gp] = HEAP_ADDRESS;
     mips->program = program;
 }
 
 void initSimulator(LMips* mips, Memory* memory) {
     resetSimulator(mips);
-    mips->regs[$sp] = STACK_OFFSET;
-    mips->regs[$gp] = DATA_OFFSET;
-    mips->program = &memory->store[PROGRAM_OFFSET];
+    mips->regs[$sp] = STACK_ADDRESS;
+    mips->regs[$gp] = HEAP_ADDRESS;
+    mips->program = &memory->store[PROGRAM_ADDRESS];
 
     mips->memory = memory;
 }
@@ -90,7 +90,7 @@ ExecutionResult execInstruction(LMips* mips) {
     } while(false)
 #define BINU_OP(op) (mips->regs[GET_RD(instr)] = mips->regs[GET_RS(instr)] op mips->regs[GET_RT(instr)])
 #define CHECK_MEM_ADDR(offset, align, address) \
-    if ((offset % align != 0) || address >= MEMORY_SIZE) return EXEC_ERR_MEMORY_ADDR
+    if ((offset % align != 0) || address >= MEMORY_SIZE || address < DATA_ADDRESS) return EXEC_ERR_MEMORY_ADDR
 #define COMP_OP(op) \
     if ((int32_t)(mips->regs[GET_RS(instr)]) op 0) { \
         uint32_t offset = GET_IMMED(instr) << 2; \
@@ -430,8 +430,8 @@ ExecutionResult execInstruction(LMips* mips) {
 
 void handleException(ExecutionResult exc, LMips* mips) {
     if (exc == EXEC_ERR_INT_OVERFLOW) {
-        fprintf(stderr, "[%#010x] Integer overflow exception.\n", PROGRAM_OFFSET + mips->ip);
+        fprintf(stderr, "[%#08x] Integer overflow exception.\n", PROGRAM_ADDRESS + mips->ip);
     } else if (exc == EXEC_ERR_MEMORY_ADDR) {
-        fprintf(stderr, "[%#010x] Invalid memory address.\n", PROGRAM_OFFSET + mips->ip);
+        fprintf(stderr, "[%#08x] Invalid memory address.\n", PROGRAM_ADDRESS + mips->ip);
     }
 }
