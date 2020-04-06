@@ -232,12 +232,7 @@ class Assembler {
         case "xor":
         case "slt":
         case "sltu": {
-            int tgt = instr.rt.value;
-            if (instr.rt.type == TokenType.T_SCALAR) {
-              // addi $at, $zero, immed
-              tgt = getRegister("\$at");
-              this.emitImmediate("ori", 0x00, tgt, instr.rt.value);
-            }
+            int tgt = this._getRt(instr.rt);
             this.emitSpecial(instr.name, instr.rs.value, tgt, instr.rd.value, 0x00);
             break;
           }
@@ -266,12 +261,7 @@ class Assembler {
         case "rem":
         case "remu": {
           // remu rd, rs, rt -> divu rs, rt ; mfhi rd
-          var tgt = instr.rt.value;
-          if (instr.rt.type == TokenType.T_SCALAR) {
-            // addi $at, $zero, immed
-            tgt = getRegister("\$at");
-            this.emitImmediate("ori", 0x00, tgt, instr.rt.value);
-          }
+          var tgt = this._getRt(instr.rt);
           this.emitSpecial(instr.name.endsWith("u") ? "divu" : "div", instr.rs.value, tgt, 0x00, 0x00);
           this.emitSpecial("mfhi", 0x00, 0x00, instr.rd.value, 0x00);
           break;
@@ -300,41 +290,16 @@ class Assembler {
         case "b":
         case "j":
         case "jal": {
-          Token label = instr.immed;
-          int address;
-          if (label.type == TokenType.T_IDENTIFIER) {
-            if(!this.assembly.labels.containsKey(label.value)) {
-              throw new AssemblerError(label, "Undefined label '${label.value}'.");
-            }
-
-            address = this.assembly.labels[label.value].address >> 2;
-          } else {
-            address = ((label.value as int) >> 2) & 0x03FFFFFF;
-          }
+          int address = this._getAddress(instr.immed, true);
 
           this.emitJInstruction(OpCodes[instr.name == "b" ? "j" : instr.name], address);
           break;
         }
         case "beq":
         case "bne": {
-          Token label = instr.immed;
-          int address;
-          if (label.type == TokenType.T_IDENTIFIER) {
-            if(!this.assembly.labels.containsKey(label.value)) {
-              throw new AssemblerError(label, "Undefined label '${label.value}'.");
-            }
+          int address = this._getAddress(instr.immed);
 
-            address = this.resolveLabelAddr(this.assembly.labels[label.value].address) >> 2;
-          } else {
-            address = ((label.value as int) >> 2) & 0x03FFFFFF;
-          }
-
-          var tgt = instr.rt.value;
-          if (instr.rt.type == TokenType.T_SCALAR) {
-            // addi $at, $zero, immed
-            tgt = getRegister("\$at");
-            this.emitImmediate("addi", 0x00, tgt, instr.rt.value);
-          }
+          int tgt = this._getRt(instr.rt);
 
           this.emitImmediate(instr.name, instr.rs.value, tgt, address);
           break;
@@ -343,27 +308,12 @@ class Assembler {
           // blt rs, rt, label -> slt $at, rs, rt ; bne $at, $zero, label;
 
           // slt $at, rs, rt
-          var tgt = instr.rt.value;
-          if (instr.rt.type == TokenType.T_SCALAR) {
-            // ori $at, $zero, immed
-            tgt = getRegister("\$at");
-            this.emitImmediate("ori", 0x00, tgt, instr.rt.value);
-          }
+          int tgt = this._getRt(instr.rt);
 
           this.emitSpecial("slt", instr.rs.value, tgt, getRegister("\$at"), 0x00);
 
           // bne $at, $zero, label
-          int address;
-          var label = instr.immed;
-          if (label.type == TokenType.T_IDENTIFIER) {
-            if(!this.assembly.labels.containsKey(label.value)) {
-              throw new AssemblerError(label, "Undefined label '${label.value}'.");
-            }
-
-            address = this.resolveLabelAddr(this.assembly.labels[label.value].address) >> 2;
-          } else {
-            address = ((label.value as int) >> 2) & 0x03FFFFFF;
-          }
+          int address = this._getAddress(instr.immed);
           this.emitImmediate("bne", getRegister("\$at"), 0x00, address);
           break;
         }
@@ -387,10 +337,10 @@ class Assembler {
             throw new AssemblerError(label, "Undefined label '${label.value}'.");
           }
 
-          address = this.assembly.labels[label.value].address;
+          address = DATA_TOP + this.assembly.labels[label.value].address;
           // ori $rd, $gp, address
-          this.emitImmediate("lui", 0x00, getRegister("\$at"), DATA_TOP >> 16);
-          this.emitImmediate("ori", getRegister("\$at"), instr.rt.value, DATA_TOP + address);
+          this.emitImmediate("lui", 0x00, getRegister("\$at"), address >> 16);
+          this.emitImmediate("ori", getRegister("\$at"), instr.rt.value, address);
           break;
         }
         case "lb":
@@ -474,6 +424,32 @@ class Assembler {
 
   int resolveLabelAddr(int label) {
     return label - this.address;
+  }
+
+  int _getAddress(Token label, [bool absolute = false]) {
+    if (label.type == TokenType.T_IDENTIFIER) {
+      if(!this.assembly.labels.containsKey(label.value)) {
+        throw new AssemblerError(label, "Undefined label '${label.value}'.");
+      }
+
+      int address = absolute
+          ? this.assembly.labels[label.value].address
+          : this.resolveLabelAddr(this.assembly.labels[label.value].address);
+      return address >> 2;
+    }
+
+    return ((label.value as int) >> 2) & 0x03FFFFFF;
+  }
+
+  int _getRt(Token token) {
+    if (token.type == TokenType.T_SCALAR) {
+      // ori $at, $zero, immed
+      int rt = getRegister("\$at");
+      this.emitImmediate("ori", 0x00, rt, token.value);
+      return rt;
+    }
+
+    return token.value;
   }
 }
 

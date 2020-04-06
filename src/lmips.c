@@ -108,9 +108,12 @@ ExecutionResult execInstruction(LMips* mips) {
                     mips->regs[GET_RD(instr)] = mips->regs[GET_RT(instr)] << GET_SA(instr);
                     break;
                 }
-                case SPE_SRL:
-                case SPE_SRA: {
+                case SPE_SRL: {
                     mips->regs[GET_RD(instr)] = mips->regs[GET_RT(instr)] >> GET_SA(instr);
+                    break;
+                }
+                case SPE_SRA: {
+                    mips->regs[GET_RD(instr)] = (int32_t)mips->regs[GET_RT(instr)] >> GET_SA(instr);
                     break;
                 }
                 case SPE_SLLV: {

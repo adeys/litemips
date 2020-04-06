@@ -136,6 +136,7 @@ class Parser {
       case "multu":
       case "neg":
       case "negu":
+      case "not":
       case "jalr":
       case "move":
         {
@@ -156,6 +157,7 @@ class Parser {
       case "add":
       case "addu":
       case "and":
+      case "mul":
       case "nor":
       case "or":
       case "rem":
@@ -170,11 +172,8 @@ class Parser {
       case "sltu":
       case "seq":
       case "sge":
-      case "sgeu":
       case "sgt":
-      case "sgtu":
       case "sle":
-      case "sleu":
       case "sne":
         {
           Token dest = expect(TokenType.T_REGISTER,
@@ -204,13 +203,9 @@ class Parser {
       case "beq":
       case "bne":
       case "bge":
-      case "bgeu":
       case "bgt":
-      case "bgtu":
       case "ble":
-      case "bleu":
       case "blt":
-      case "bltu":
         {
           Token dest = expect(TokenType.T_REGISTER,
               "Expected register as '${token.value}' first operand.");
