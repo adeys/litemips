@@ -42,11 +42,9 @@ class Parser {
       throw new ParseError();
     }
 
-    if (peek().type == TokenType.T_INSTRUCTION) {
-      Label label = new Label(this.current.value, Segment.SGT_TEXT,
-          this.assembly.instructions.length);
-      this.assembly.addLabel(label);
-      return;
+    if (this.assembly.labels.containsKey(this.current.value)) {
+      reportError("Label '${this.current.value}' has aleady been declared at line ${this.assembly.labels[this.current.value].address + 1}.");
+      throw new ParseError();
     }
 
     if (peek().type == TokenType.T_DIRECTIVE) {
@@ -56,7 +54,10 @@ class Parser {
       return;
     }
 
-    reportError("Expected an instruction or a directive.");
+    Label label = new Label(this.current.value, Segment.SGT_TEXT,
+        this.assembly.instructions.length);
+    this.assembly.addLabel(label);
+    return;
   }
 
   void getDirective() {

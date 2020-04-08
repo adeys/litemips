@@ -133,6 +133,7 @@ class Assembler {
         case "ble":
         case "sge":
         case "sgt":
+        case "mul":
         case "rem":
         case "remu": {
           address += instr.rt.type == TokenType.T_SCALAR ? 8 : 4;
@@ -149,7 +150,6 @@ class Assembler {
           address += instr.rs == null ? 8 : 0;
           break;
         }
-        case "mul":
         case "abs": {
           address += 8;
           break;

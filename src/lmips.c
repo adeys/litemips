@@ -148,6 +148,7 @@ ExecutionResult execInstruction(LMips* mips) {
                             break;
                         }
                         case SYS_PRINT_STRING: {
+                            CHECK_MEM_ADDR(0, 1, mips->regs[$a0]);
                             const char* string = (const char*)&mips->memory->store[mips->regs[$a0]];
                             printf("%s", string);
                             fflush(stdout);
@@ -162,6 +163,7 @@ ExecutionResult execInstruction(LMips* mips) {
                         }
                         case SYS_READ_STRING: {
                             uint32_t address = mips->regs[$a0];
+                            CHECK_MEM_ADDR(0, 1, address);
                             fgets((char*)&mips->memory->store[address], mips->regs[$a1], stdin);
                             mips->memory->store[address + strlen((char*)&mips->memory->store[address]) - 1] = '\0';
                             break;
@@ -169,6 +171,7 @@ ExecutionResult execInstruction(LMips* mips) {
                         case SYS_SBRK: {
                             mips->regs[$v0] = mips->heap;
                             mips->heap += mips->regs[$a0];
+                            CHECK_MEM_ADDR(0, 1, mips->heap);
                             break;
                         }
                         case SYS_EXIT: {
@@ -320,7 +323,7 @@ ExecutionResult execInstruction(LMips* mips) {
             break;
         }
         case OP_ADDIU: {
-            int32_t immed = zero_extend(GET_IMMED(instr), 16);
+            int32_t immed = sign_extend(GET_IMMED(instr), 16);
 
             mips->regs[GET_RT(instr)] = (int32_t)(mips->regs[GET_RS(instr)]) + immed;
             break;
@@ -332,7 +335,7 @@ ExecutionResult execInstruction(LMips* mips) {
             break;
         }
         case OP_SLTIU: {
-            uint32_t immed = zero_extend(GET_IMMED(instr), 16);
+            uint32_t immed = sign_extend(GET_IMMED(instr), 16);
 
             mips->regs[GET_RT(instr)] = (int32_t)(mips->regs[GET_RS(instr)]) < immed;
             break;
