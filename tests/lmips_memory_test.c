@@ -8,7 +8,7 @@ void testLoadInvalidMemoryAddressInstruction(CuTest* test) {
 
     // Exceed allowed memory
     uint8_t program[] = {
-        0x83, 0x85, 0x00, 0x02, // lb $t0, 2($gp)
+        0x8F, 0x88, 0x00, 0x02, // lw $t0, 2($gp)
         0x20, 0x02, 0x00, 0x0A, // addi $v0, $zero, 10
         OP_SPECIAL, 0, 0, SPE_SYSCALL
     };

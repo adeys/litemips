@@ -375,7 +375,7 @@ class Assembler {
 
           address = this.resolveLabelAddr(this.assembly.labels[label.value].address) >> 2;
 
-          this.emitImmediate(instr.name.substring(0, 2), 0x00, instr.rt.value, address);
+          this.emitImmediate(instr.name.substring(0, 3), 0x00, instr.rt.value, address);
           break;
         }
         case "blt":
