@@ -196,9 +196,6 @@ class Assembler {
       switch(directive.name) {
         case ".space": {
           this.emitBytes(List.filled(directive.operands[0], 0));
-          for (int i = directive.operands.length - 1; i > 0 ; i--) {
-            this.emitByte(0);
-          }
           break;
         }
         case ".byte":
@@ -222,6 +219,8 @@ class Assembler {
           break;
         }
       }
+
+      this.emitBytes(List.filled(directive.align, 0));
     }
 
     data.size = this.offset - data.offset;

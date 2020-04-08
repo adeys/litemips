@@ -254,7 +254,7 @@ ExecutionResult execInstruction(LMips* mips) {
                 }
                 case SPE_SLT:
                 case SPE_SLTU: {
-                    mips->regs[GET_RD(instr)] = (mips->regs[GET_RS(instr)] < mips->regs[GET_RT(instr)]);
+                    mips->regs[GET_RD(instr)] = ((int32_t)mips->regs[GET_RS(instr)] < (int32_t)mips->regs[GET_RT(instr)]);
                     break;
                 }
                 default:

@@ -402,7 +402,7 @@ class Parser {
     if (mod != 0) {
       size -=  mod;
       List<int> expand = new List(size); expand.fillRange(0, size, 0);
-      this.assembly.directives.last.operands.addAll(expand);
+      this.assembly.directives.last.align = size;
       this.assembly.dataSize += size;
       this.assembly.labels.values.last.address += size;
     }

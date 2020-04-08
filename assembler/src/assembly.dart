@@ -13,6 +13,7 @@ class Label {
 class Directive {
   String name;
   List<Object> operands = [];
+  int align = 0;
 
   Directive(this.name);
 }
