@@ -4,6 +4,7 @@ project(lmips)
 set(CMAKE_C_STANDARD 11)
 
 set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS}  "-g -O3 -march=native -fno-strict-aliasing")
 
 file(GLOB SOURCE_FILES "src/*.c" "src/*/*.c")
 
